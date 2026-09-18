@@ -68,4 +68,5 @@ Requiere PHP y MySQL/MariaDB instalados localmente (por ejemplo vía WAMP, XAMPP
 
 - [docs/ARQUITECTURA.md](docs/ARQUITECTURA.md) — arquitectura del sistema y flujo de datos
 - [docs/DECISIONES.md](docs/DECISIONES.md) — registro de decisiones técnicas y su justificación
+- [docs/HERRAMIENTAS.md](docs/HERRAMIENTAS.md) — herramientas y entorno de desarrollo concretos (útil para armar el prompt inicial de un proyecto nuevo)
 - [CLAUDE.md](CLAUDE.md) — contexto y reglas de trabajo para asistencia con Claude Code
