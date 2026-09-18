@@ -1,0 +1,27 @@
+# --- Frontend (React/Vite) ---
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# --- Backend (PHP) ---
+backend/vendor/
+backend/config/*.local.php
+
+# --- Variables de entorno ---
+.env
+.env.local
+*.env
+
+# --- Base de datos ---
+database/*.sqlite
+database/dumps/
+
+# --- Logs ---
+*.log
+logs/
+
+# --- Sistema operativo / editor ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
