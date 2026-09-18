@@ -2,7 +2,9 @@
 
 [Nombre y descripción corta del sistema — completar al arrancar el proyecto].
 
-**Estado actual: en configuración inicial.** Todavía no hay funcionalidades implementadas. Este repositorio arranca como plantilla de trabajo (estructura, convenciones y patrones de código de CodeNation-SC), sin datos ni lógica de negocio de ningún proyecto anterior.
+> Metodología de trabajo propia de **CodeNation-SC** (Marco Busto): estructura de carpetas, reglas de trabajo (`CLAUDE.md`) y patrones de código que se repiten en todos los proyectos, para mantener coherencia entre sistemas distintos. No pertenece a ningún cliente ni proyecto en particular.
+
+**Estado actual: en configuración inicial.** Todavía no hay funcionalidades implementadas ni datos de negocio — arranca completamente desde cero.
 
 ## Stack
 

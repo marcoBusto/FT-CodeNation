@@ -2,6 +2,8 @@
 
 Contexto para Claude Code al trabajar en este repositorio.
 
+> Este archivo es la metodología de trabajo propia de **CodeNation-SC** (Marco Busto), replicada desde otros proyectos para mantener coherencia entre sistemas. Las reglas de trabajo de abajo son de la marca, no de este proyecto en particular — ajustar solo lo que sea específico de este sistema (sección "Proyecto" y "Stack").
+
 ## Proyecto
 
 [Nombre y descripción corta del sistema — completar al arrancar el proyecto]. Estado actual: **en configuración inicial**, sin funcionalidades implementadas todavía.
