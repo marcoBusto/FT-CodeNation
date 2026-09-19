@@ -6,6 +6,7 @@ frontend/.vite/
 # --- Backend (PHP) ---
 backend/vendor/
 backend/config/*.local.php
+backend/.phpunit.result.cache
 
 # --- Variables de entorno ---
 .env

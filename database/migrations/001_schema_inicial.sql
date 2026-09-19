@@ -1,8 +1,8 @@
 -- =============================================================================
--- ESQUEMA BASE DE DATOS: Gestión de Stock e Insumos Agrícolas (Multi-Tenant)
+-- MIGRACIÓN 001: esquema inicial del módulo de Stock e Insumos Agrícolas
 -- Motor: MySQL/MariaDB
--- Características: Multi-tenant (aislamiento por tenant_id), stock inmutable
---                  basado en movimientos (ENTRADA / EGRESO_LOTE / AJUSTE)
+-- Este archivo no se edita una vez aplicado: cambios futuros van en 002_, 003_...
+-- database/schema.sql refleja siempre el esquema completo y actual.
 -- =============================================================================
 
 SET FOREIGN_KEY_CHECKS = 0;

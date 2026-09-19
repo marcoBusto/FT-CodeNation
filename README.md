@@ -48,21 +48,28 @@ Requiere PHP y MySQL/MariaDB instalados localmente (por ejemplo vía WAMP, XAMPP
 
 1. Crear la base de datos y aplicar el schema:
    ```
-   mysql -u root -e "CREATE DATABASE IF NOT EXISTS nombre_de_la_base CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-   mysql -u root nombre_de_la_base < database/schema.sql
+   mysql -u root -e "CREATE DATABASE IF NOT EXISTS stock_agricola CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+   mysql -u root stock_agricola < database/schema.sql
    ```
-2. Crear `backend/.env` (no se commitea) con los datos de conexión reales:
+2. Copiar `backend/.env.example` a `backend/.env` (no se commitea) y ajustar los datos de conexión reales.
+3. Instalar las dependencias del backend (PHPUnit, solo para tests) y levantar el servidor embebido de PHP, usando `index.php` como router (para que rutas como `/recurso` funcionen, no solo `/`):
    ```
-   DB_HOST=127.0.0.1
-   DB_PORT=3306
-   DB_DATABASE=nombre_de_la_base
-   DB_USERNAME=root
-   DB_PASSWORD=
+   cd backend && composer install
+   php -S localhost:8000 -t public public/index.php
    ```
-3. Levantar el servidor embebido de PHP, usando `index.php` como router (para que rutas como `/recurso` funcionen, no solo `/`):
+4. Levantar el frontend:
    ```
-   php -S localhost:8000 -t backend/public backend/public/index.php
+   cd frontend && npm install && npm run dev
    ```
+
+### Correr los tests del backend
+
+Los tests corren contra su propia base de datos (nunca contra la de desarrollo), fijada en `backend/tests/bootstrap.php`. Crearla una vez:
+```
+mysql -u root -e "CREATE DATABASE IF NOT EXISTS stock_agricola_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+mysql -u root stock_agricola_test < database/schema.sql
+cd backend && vendor/bin/phpunit
+```
 
 ## Documentación
 

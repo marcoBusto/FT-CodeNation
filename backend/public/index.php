@@ -8,8 +8,11 @@ ini_set('log_errors', '1');
 error_reporting(E_ALL);
 
 require __DIR__ . '/../config/Database.php';
-// A medida que se creen controllers, requerirlos acá:
-// require __DIR__ . '/../src/Controllers/EjemploController.php';
+require __DIR__ . '/../src/Tenant.php';
+require __DIR__ . '/../src/Controllers/CampoController.php';
+require __DIR__ . '/../src/Controllers/LoteController.php';
+require __DIR__ . '/../src/Controllers/InsumoController.php';
+require __DIR__ . '/../src/Controllers/MovimientoInsumoController.php';
 
 // React corre en un origen distinto (puerto/dominio propio) al de esta API,
 // tanto en desarrollo como en producción, asi que el navegador exige estos
@@ -17,7 +20,7 @@ require __DIR__ . '/../config/Database.php';
 $origenPermitido = getenv('FRONTEND_URL') ?: 'http://localhost:5173';
 header("Access-Control-Allow-Origin: {$origenPermitido}");
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type');
+header('Access-Control-Allow-Headers: Content-Type, X-Tenant-Id');
 header('Content-Type: application/json; charset=utf-8');
 
 $metodo = $_SERVER['REQUEST_METHOD'];
@@ -60,6 +63,7 @@ function responderResultado(array $resultado, int $codigoExito = 200): void
 
 $ruta = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $cuerpo = fn () => json_decode(file_get_contents('php://input'), true) ?? [];
+$query = fn (string $clave) => isset($_GET[$clave]) && $_GET[$clave] !== '' ? (int) $_GET[$clave] : null;
 
 try {
     if ($ruta === '/' && $metodo === 'GET') {
@@ -71,24 +75,59 @@ try {
         return;
     }
 
-    // Patrón para nuevas rutas:
-    //
-    // if ($ruta === '/recurso' && $metodo === 'GET') {
-    //     responder(RecursoController::listar());
-    //     return;
-    // }
-    //
-    // if ($ruta === '/recurso' && $metodo === 'POST') {
-    //     responderResultado(RecursoController::crear($cuerpo()), 201);
-    //     return;
-    // }
-    //
-    // if (preg_match('#^/recurso/(\d+)$#', $ruta, $coincidencia) && $metodo === 'PUT') {
-    //     responderResultado(RecursoController::actualizar((int) $coincidencia[1], $cuerpo()));
-    //     return;
-    // }
+    // Toda ruta de acá en adelante pertenece al módulo de Stock e Insumos y
+    // exige un tenant válido (ver src/Tenant.php: solución temporal hasta
+    // que exista login real).
+    $tenantId = Tenant::resolverDesdeHeader($_SERVER['HTTP_X_TENANT_ID'] ?? null);
+
+    if ($ruta === '/campos' && $metodo === 'GET') {
+        responder(CampoController::listar($tenantId));
+        return;
+    }
+
+    if ($ruta === '/campos' && $metodo === 'POST') {
+        responderResultado(CampoController::crear($tenantId, $cuerpo()), 201);
+        return;
+    }
+
+    if ($ruta === '/lotes' && $metodo === 'GET') {
+        responder(LoteController::listar($tenantId, $query('campo_id')));
+        return;
+    }
+
+    if ($ruta === '/lotes' && $metodo === 'POST') {
+        responderResultado(LoteController::crear($tenantId, $cuerpo()), 201);
+        return;
+    }
+
+    if ($ruta === '/insumos' && $metodo === 'GET') {
+        responder(InsumoController::listar($tenantId));
+        return;
+    }
+
+    if ($ruta === '/insumos' && $metodo === 'POST') {
+        responderResultado(InsumoController::crear($tenantId, $cuerpo()), 201);
+        return;
+    }
+
+    if ($ruta === '/insumos/stock' && $metodo === 'GET') {
+        responder(InsumoController::stock($tenantId));
+        return;
+    }
+
+    if ($ruta === '/movimientos' && $metodo === 'GET') {
+        responder(MovimientoInsumoController::listar($tenantId, $query('insumo_id'), $query('lote_id')));
+        return;
+    }
+
+    if ($ruta === '/movimientos' && $metodo === 'POST') {
+        responderResultado(MovimientoInsumoController::registrar($tenantId, $cuerpo()), 201);
+        return;
+    }
 
     responderError('Ruta no encontrada', 404);
+} catch (DomainException $e) {
+    responderError($e->getMessage(), 400);
 } catch (Throwable $e) {
     responderError('Error interno del servidor', 500);
 }

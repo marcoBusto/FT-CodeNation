@@ -1,12 +1,12 @@
 @import "tailwindcss";
 
-/* Paleta de marca: reemplazar estos valores por los del proyecto cuando
-   se definan (ver docs/DECISIONES.md). Mantener el mismo mecanismo
-   (@theme de Tailwind v4) por coherencia con otros sistemas. */
+/* Paleta de marca del cliente (Cabaña María Lucía de Ferrero): verde inglés
+   oscuro + dorado, tomada de su sitio institucional (ver docs/DECISIONES.md).
+   Logo pendiente de recibir en mejor calidad — por ahora el header usa texto. */
 @theme {
-  --color-brand-primary: #2563eb;
-  --color-brand-primary-dark: #1d4ed8;
-  --color-brand-accent: #f59e0b;
+  --color-brand-primary: #1f4b33;
+  --color-brand-primary-dark: #163825;
+  --color-brand-accent: #c6a344;
 }
 
 @layer components {
