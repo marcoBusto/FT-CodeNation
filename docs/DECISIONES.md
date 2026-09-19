@@ -71,3 +71,15 @@ Registro de decisiones importantes del proyecto y su justificación, para no per
 **Nota:** mismo tipo de fricción con Avast ya documentado en el proyecto de referencia (interceptación SSL de Composer, resuelta ahí con `cacert.pem`) — antivirus con inspección profunda es una fuente de fricción recurrente en esta máquina de desarrollo, no algo a replicar en el servidor de producción.
 
 ---
+
+## 2026-09-19 — Lote: polígono dibujado en mapa (Google Maps) + perímetro
+
+**Decisión:** `lotes` suma dos columnas opcionales: `perimetro_metros` (DECIMAL) y `poligono` (JSON, array de `{lat, lng}`). Se completan desde el frontend (`frontend/src/MapaLote.jsx`, con Google Maps Drawing + Geometry libraries) cuando el usuario dibuja el lote sobre el mapa en vez de tipear las hectáreas a mano. Siguen siendo opcionales — un lote se puede seguir cargando solo con hectáreas manuales, como hasta ahora.
+
+**Motivo:** pedido explícito del usuario para que los productores delimiten sus lotes visualmente. Se guarda como JSON plano (no tipos GIS de MySQL) por simplicidad — no hay necesidad todavía de consultas espaciales (intersecciones, distancias entre lotes, etc.) que justifiquen esa complejidad.
+
+**Dependencia externa nueva:** requiere una API key de Google Maps (`VITE_GOOGLE_MAPS_API_KEY`), con facturación habilitada en Google Cloud (tiene cuota gratuita mensual, pero exige tarjeta cargada). La gestiona el usuario directamente, no CodeNation-SC.
+
+**Cálculo en el backend, no en el cliente:** se agregó `POST /lotes/estimar-insumo` (`hectareas × dosis_por_ha`) como ayuda para planificar compras de insumo antes de registrar un movimiento real. No persiste nada — es una estimación descartable. `dosis_por_ha` no tiene un valor por defecto fijo en el sistema (varía por insumo/cultivo); lo indica el usuario en cada estimación, para no inventar una regla de negocio no definida.
+
+---

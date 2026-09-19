@@ -74,6 +74,8 @@ CREATE TABLE lotes (
     campo_id INT NOT NULL,
     nombre VARCHAR(150) NOT NULL,
     hectareas DECIMAL(10, 2) NOT NULL,
+    perimetro_metros DECIMAL(12, 2) NULL,
+    poligono JSON NULL COMMENT 'Array [{lat,lng}, ...] del polígono dibujado en el mapa',
     estado ENUM('activo', 'inactivo') NOT NULL DEFAULT 'activo',
     creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (tenant_id) REFERENCES tenants(id),

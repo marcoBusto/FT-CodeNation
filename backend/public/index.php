@@ -100,6 +100,11 @@ try {
         return;
     }
 
+    if ($ruta === '/lotes/estimar-insumo' && $metodo === 'POST') {
+        responderResultado(LoteController::estimarInsumo($cuerpo()));
+        return;
+    }
+
     if ($ruta === '/insumos' && $metodo === 'GET') {
         responder(InsumoController::listar($tenantId));
         return;
