@@ -8,6 +8,20 @@ class Database
 {
     private static ?PDO $connection = null;
 
+    // Algunos hostings compartidos deshabilitan putenv() por seguridad (el
+    // valor se setea igual, pero getenv() nunca lo ve). Este array es el
+    // respaldo para esos casos: cargarEnv() lo llena siempre, además de
+    // intentar putenv(), y obtenerVariable() lo usa si getenv() no sirvió.
+    private static array $env = [];
+
+    // Público porque index.php necesita el .env cargado desde el arranque
+    // (ej. para armar el header CORS con FRONTEND_URL), no recién cuando se
+    // abre la primera conexión a la base de datos.
+    public static function inicializarEnv(): void
+    {
+        self::cargarEnv();
+    }
+
     // PHP no carga backend/.env solo: getenv() lee variables de entorno del
     // sistema operativo, no archivos .env. Se parsea a mano acá en vez de
     // sumar una dependencia de Composer (ej. vlucas/phpdotenv) solo para esto.
@@ -25,21 +39,30 @@ class Database
             }
             [$clave, $valor] = explode('=', $linea, 2);
             $clave = trim($clave);
-            if (getenv($clave) === false) {
-                putenv($clave . '=' . trim($valor));
+            $valor = trim($valor);
+            if (getenv($clave) === false && !isset(self::$env[$clave])) {
+                self::$env[$clave] = $valor;
+                @putenv($clave . '=' . $valor);
             }
         }
+    }
+
+    public static function obtenerVariable(string $clave, string $porDefecto = ''): string
+    {
+        $valor = getenv($clave);
+
+        return $valor !== false ? $valor : (self::$env[$clave] ?? $porDefecto);
     }
 
     public static function getConnection(): PDO
     {
         if (self::$connection === null) {
             self::cargarEnv();
-            $host = getenv('DB_HOST') ?: '127.0.0.1';
-            $port = getenv('DB_PORT') ?: '3306';
-            $database = getenv('DB_DATABASE') ?: 'nombre_de_la_base'; // TODO: completar
-            $username = getenv('DB_USERNAME') ?: 'root';
-            $password = getenv('DB_PASSWORD') ?: '';
+            $host = self::obtenerVariable('DB_HOST', '127.0.0.1');
+            $port = self::obtenerVariable('DB_PORT', '3306');
+            $database = self::obtenerVariable('DB_DATABASE', 'nombre_de_la_base'); // TODO: completar
+            $username = self::obtenerVariable('DB_USERNAME', 'root');
+            $password = self::obtenerVariable('DB_PASSWORD', '');
 
             $dsn = "mysql:host={$host};port={$port};dbname={$database};charset=utf8mb4";
 

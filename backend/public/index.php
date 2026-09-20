@@ -14,10 +14,14 @@ require __DIR__ . '/../src/Controllers/LoteController.php';
 require __DIR__ . '/../src/Controllers/InsumoController.php';
 require __DIR__ . '/../src/Controllers/MovimientoInsumoController.php';
 
+// Carga el .env desde el arranque (no recién en la primera conexión a la
+// base) porque el header CORS de acá abajo lo necesita ya mismo.
+Database::inicializarEnv();
+
 // React corre en un origen distinto (puerto/dominio propio) al de esta API,
 // tanto en desarrollo como en producción, asi que el navegador exige estos
 // headers para permitir que el frontend lea la respuesta.
-$origenPermitido = getenv('FRONTEND_URL') ?: 'http://localhost:5173';
+$origenPermitido = Database::obtenerVariable('FRONTEND_URL', 'http://localhost:5173');
 header("Access-Control-Allow-Origin: {$origenPermitido}");
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, X-Tenant-Id');
