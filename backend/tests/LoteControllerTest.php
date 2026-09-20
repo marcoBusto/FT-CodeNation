@@ -71,4 +71,49 @@ final class LoteControllerTest extends DatabaseTestCase
 
         $this->assertArrayHasKey('errores', $resultado);
     }
+
+    public function testEditarActualizaHectareas(): void
+    {
+        $tenantId = $this->crearTenant();
+        $campoId = $this->crearCampo($tenantId);
+        $loteId = $this->crearLote($tenantId, $campoId, 10.0);
+
+        $resultado = LoteController::editar($tenantId, $loteId, [
+            'campo_id' => $campoId,
+            'nombre' => 'Lote 1',
+            'hectareas' => 15.5,
+        ]);
+
+        $this->assertArrayHasKey('id', $resultado);
+        $lotes = LoteController::listar($tenantId);
+        $this->assertSame(15.5, (float) $lotes[0]['hectareas']);
+    }
+
+    public function testEditarRechazaLoteDeOtroTenant(): void
+    {
+        $tenantA = $this->crearTenant('Tenant A');
+        $tenantB = $this->crearTenant('Tenant B');
+        $campoA = $this->crearCampo($tenantA);
+        $loteA = $this->crearLote($tenantA, $campoA);
+
+        $resultado = LoteController::editar($tenantB, $loteA, [
+            'campo_id' => $campoA,
+            'nombre' => 'Hackeado',
+            'hectareas' => 1,
+        ]);
+
+        $this->assertArrayHasKey('errores', $resultado);
+    }
+
+    public function testEliminarLoSacaDelListado(): void
+    {
+        $tenantId = $this->crearTenant();
+        $campoId = $this->crearCampo($tenantId);
+        $loteId = $this->crearLote($tenantId, $campoId);
+
+        $resultado = LoteController::eliminar($tenantId, $loteId);
+
+        $this->assertArrayHasKey('id', $resultado);
+        $this->assertCount(0, LoteController::listar($tenantId));
+    }
 }

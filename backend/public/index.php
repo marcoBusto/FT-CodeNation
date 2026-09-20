@@ -77,6 +77,16 @@ $ruta = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $cuerpo = fn () => json_decode(file_get_contents('php://input'), true) ?? [];
 $query = fn (string $clave) => isset($_GET[$clave]) && $_GET[$clave] !== '' ? (int) $_GET[$clave] : null;
 
+// Devuelve el {id} de rutas tipo "/campos/123" para el recurso dado, o null
+// si $ruta no matchea ese patrón. Evita repetir el mismo preg_match en cada
+// ruta de editar/eliminar.
+$idDeRuta = function (string $recurso) use ($ruta): ?int {
+    if (preg_match('#^/' . preg_quote($recurso, '#') . '/(\d+)$#', $ruta, $m)) {
+        return (int) $m[1];
+    }
+    return null;
+};
+
 try {
     if ($ruta === '/' && $metodo === 'GET') {
         responder([
@@ -102,6 +112,16 @@ try {
         return;
     }
 
+    if (($id = $idDeRuta('campos')) !== null && $metodo === 'PUT') {
+        responderResultado(CampoController::editar($tenantId, $id, $cuerpo()));
+        return;
+    }
+
+    if (($id = $idDeRuta('campos')) !== null && $metodo === 'DELETE') {
+        responderResultado(CampoController::eliminar($tenantId, $id));
+        return;
+    }
+
     if ($ruta === '/lotes' && $metodo === 'GET') {
         responder(LoteController::listar($tenantId, $query('campo_id')));
         return;
@@ -109,6 +129,16 @@ try {
 
     if ($ruta === '/lotes' && $metodo === 'POST') {
         responderResultado(LoteController::crear($tenantId, $cuerpo()), 201);
+        return;
+    }
+
+    if (($id = $idDeRuta('lotes')) !== null && $metodo === 'PUT') {
+        responderResultado(LoteController::editar($tenantId, $id, $cuerpo()));
+        return;
+    }
+
+    if (($id = $idDeRuta('lotes')) !== null && $metodo === 'DELETE') {
+        responderResultado(LoteController::eliminar($tenantId, $id));
         return;
     }
 
@@ -127,6 +157,16 @@ try {
         return;
     }
 
+    if (($id = $idDeRuta('insumos')) !== null && $metodo === 'PUT') {
+        responderResultado(InsumoController::editar($tenantId, $id, $cuerpo()));
+        return;
+    }
+
+    if (($id = $idDeRuta('insumos')) !== null && $metodo === 'DELETE') {
+        responderResultado(InsumoController::eliminar($tenantId, $id));
+        return;
+    }
+
     if ($ruta === '/insumos/stock' && $metodo === 'GET') {
         responder(InsumoController::stock($tenantId));
         return;
@@ -142,6 +182,16 @@ try {
         return;
     }
 
+    if (($id = $idDeRuta('marcas')) !== null && $metodo === 'PUT') {
+        responderResultado(MarcaController::editar($tenantId, $id, $cuerpo()));
+        return;
+    }
+
+    if (($id = $idDeRuta('marcas')) !== null && $metodo === 'DELETE') {
+        responderResultado(MarcaController::eliminar($tenantId, $id));
+        return;
+    }
+
     if ($ruta === '/categorias' && $metodo === 'GET') {
         responder(CategoriaController::listar($tenantId));
         return;
@@ -149,6 +199,16 @@ try {
 
     if ($ruta === '/categorias' && $metodo === 'POST') {
         responderResultado(CategoriaController::crear($tenantId, $cuerpo()), 201);
+        return;
+    }
+
+    if (($id = $idDeRuta('categorias')) !== null && $metodo === 'PUT') {
+        responderResultado(CategoriaController::editar($tenantId, $id, $cuerpo()));
+        return;
+    }
+
+    if (($id = $idDeRuta('categorias')) !== null && $metodo === 'DELETE') {
+        responderResultado(CategoriaController::eliminar($tenantId, $id));
         return;
     }
 

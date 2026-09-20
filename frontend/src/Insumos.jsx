@@ -13,6 +13,9 @@ function Insumos() {
   const [nuevaCategoriaNombre, setNuevaCategoriaNombre] = useState('')
   const [errores, setErrores] = useState([])
   const [error, setError] = useState(null)
+  const [editandoId, setEditandoId] = useState(null)
+  const [insumoEnEdicion, setInsumoEnEdicion] = useState(INSUMO_VACIO)
+  const [erroresEdicion, setErroresEdicion] = useState([])
 
   const cargarStock = () => {
     apiFetch('/insumos/stock')
@@ -74,6 +77,43 @@ function Insumos() {
         cargarCatalogos()
       })
       .catch((err) => setErrores([err.message]))
+  }
+
+  const empezarEdicion = (insumo) => {
+    setEditandoId(insumo.id)
+    setInsumoEnEdicion({
+      nombre: insumo.nombre,
+      marca_id: insumo.marca_id ?? '',
+      categoria_id: insumo.categoria_id ?? '',
+      unidad_medida: insumo.unidad_medida,
+    })
+    setErroresEdicion([])
+  }
+
+  const cancelarEdicion = () => {
+    setEditandoId(null)
+    setErroresEdicion([])
+  }
+
+  const guardarEdicion = (id) => {
+    setErroresEdicion([])
+    apiFetch(`/insumos/${id}`, { method: 'PUT', body: JSON.stringify(insumoEnEdicion) }).then((res) => {
+      if (res.error) {
+        setErroresEdicion(res.error.detalles ?? [res.error.mensaje])
+      } else {
+        setEditandoId(null)
+        cargarStock()
+      }
+    })
+  }
+
+  const desactivarInsumo = (insumo) => {
+    if (!window.confirm(`¿Desactivar "${insumo.nombre}"? Deja de aparecer en las listas, pero no se borra su historial de movimientos.`)) {
+      return
+    }
+    apiFetch(`/insumos/${insumo.id}`, { method: 'DELETE' }).then((res) => {
+      if (!res.error) cargarStock()
+    })
   }
 
   return (
@@ -177,18 +217,91 @@ function Insumos() {
       </form>
 
       <ul className="divide-y divide-gray-200 rounded-md border border-gray-200">
-        {stock.map((i) => (
-          <li key={i.id} className="flex items-center justify-between p-3 text-sm">
-            <span className="text-gray-900">
-              {i.nombre}
-              {i.marca_nombre && <span className="text-gray-500"> · {i.marca_nombre}</span>}
-              {i.categoria_nombre && <span className="ml-2 text-xs text-brand-primary">{i.categoria_nombre}</span>}
-            </span>
-            <span className={Number(i.stock_actual) <= 0 ? 'font-medium text-red-600' : 'text-gray-500'}>
-              {i.stock_actual} {i.unidad_medida}
-            </span>
-          </li>
-        ))}
+        {stock.map((i) =>
+          editandoId === i.id ? (
+            <li key={i.id} className="space-y-2 p-3 text-sm">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <input
+                  type="text"
+                  value={insumoEnEdicion.nombre}
+                  onChange={(e) => setInsumoEnEdicion({ ...insumoEnEdicion, nombre: e.target.value })}
+                  className="campo"
+                />
+                <select
+                  value={insumoEnEdicion.marca_id}
+                  onChange={(e) => setInsumoEnEdicion({ ...insumoEnEdicion, marca_id: e.target.value })}
+                  className="campo"
+                >
+                  <option value="">Sin marca</option>
+                  {marcas.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {m.nombre}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={insumoEnEdicion.categoria_id}
+                  onChange={(e) => setInsumoEnEdicion({ ...insumoEnEdicion, categoria_id: e.target.value })}
+                  className="campo"
+                >
+                  <option value="">Sin categoría</option>
+                  {categorias.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.nombre}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={insumoEnEdicion.unidad_medida}
+                  onChange={(e) => setInsumoEnEdicion({ ...insumoEnEdicion, unidad_medida: e.target.value })}
+                  className="campo"
+                >
+                  <option value="litros">Litros</option>
+                  <option value="kg">Kg</option>
+                  <option value="bolsas">Bolsas</option>
+                </select>
+              </div>
+              {erroresEdicion.length > 0 && (
+                <ul className="rounded-md bg-red-50 p-2 text-xs text-red-700">
+                  {erroresEdicion.map((err) => (
+                    <li key={err}>{err}</li>
+                  ))}
+                </ul>
+              )}
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => guardarEdicion(i.id)}
+                  className="rounded-md bg-brand-primary px-3 py-1 text-xs text-white"
+                >
+                  Guardar
+                </button>
+                <button type="button" onClick={cancelarEdicion} className="text-xs text-gray-500 underline">
+                  Cancelar
+                </button>
+              </div>
+            </li>
+          ) : (
+            <li key={i.id} className="flex items-center justify-between p-3 text-sm">
+              <span className="text-gray-900">
+                {i.nombre}
+                {i.marca_nombre && <span className="text-gray-500"> · {i.marca_nombre}</span>}
+                {i.categoria_nombre && <span className="ml-2 text-xs text-brand-primary">{i.categoria_nombre}</span>}
+              </span>
+              <div className="flex items-center gap-3">
+                <span className={Number(i.stock_actual) <= 0 ? 'font-medium text-red-600' : 'text-gray-500'}>
+                  {i.stock_actual} {i.unidad_medida}
+                </span>
+                <button type="button" onClick={() => empezarEdicion(i)} className="text-xs text-brand-primary underline">
+                  Editar
+                </button>
+                <button type="button" onClick={() => desactivarInsumo(i)} className="text-xs text-red-600 underline">
+                  Desactivar
+                </button>
+              </div>
+            </li>
+          )
+        )}
         {stock.length === 0 && <li className="p-3 text-sm text-gray-500">Todavía no hay insumos cargados.</li>}
       </ul>
     </div>

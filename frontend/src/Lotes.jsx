@@ -12,6 +12,9 @@ function Lotes() {
   const [mapaKey, setMapaKey] = useState(0)
   const [errores, setErrores] = useState([])
   const [error, setError] = useState(null)
+  const [editandoId, setEditandoId] = useState(null)
+  const [loteEnEdicion, setLoteEnEdicion] = useState(LOTE_VACIO)
+  const [erroresEdicion, setErroresEdicion] = useState([])
 
   const cargarLotes = () => {
     apiFetch('/lotes')
@@ -55,6 +58,38 @@ function Lotes() {
         setMapaKey((k) => k + 1)
         cargarLotes()
       }
+    })
+  }
+
+  const empezarEdicion = (lote) => {
+    setEditandoId(lote.id)
+    setLoteEnEdicion({ campo_id: lote.campo_id, nombre: lote.nombre, hectareas: lote.hectareas })
+    setErroresEdicion([])
+  }
+
+  const cancelarEdicion = () => {
+    setEditandoId(null)
+    setErroresEdicion([])
+  }
+
+  const guardarEdicion = (id) => {
+    setErroresEdicion([])
+    apiFetch(`/lotes/${id}`, { method: 'PUT', body: JSON.stringify(loteEnEdicion) }).then((res) => {
+      if (res.error) {
+        setErroresEdicion(res.error.detalles ?? [res.error.mensaje])
+      } else {
+        setEditandoId(null)
+        cargarLotes()
+      }
+    })
+  }
+
+  const desactivarLote = (lote) => {
+    if (!window.confirm(`¿Desactivar "${lote.nombre}"? Deja de aparecer en las listas, pero no se borra su historial.`)) {
+      return
+    }
+    apiFetch(`/lotes/${lote.id}`, { method: 'DELETE' }).then((res) => {
+      if (!res.error) cargarLotes()
     })
   }
 
@@ -129,18 +164,77 @@ function Lotes() {
       </form>
 
       <ul className="divide-y divide-gray-200 rounded-md border border-gray-200">
-        {lotes.map((l) => (
-          <li key={l.id} className="flex items-center justify-between p-3 text-sm">
-            <div>
-              <span className="text-gray-900">{l.nombre}</span>
-              <span className="ml-2 text-gray-500">({l.campo_nombre})</span>
-              {l.poligono && <span className="ml-2 text-xs text-brand-primary">· dibujado en mapa</span>}
-            </div>
-            <span className="text-gray-500">
-              {l.hectareas} ha{l.perimetro_metros && ` · ${l.perimetro_metros} m perímetro`}
-            </span>
-          </li>
-        ))}
+        {lotes.map((l) =>
+          editandoId === l.id ? (
+            <li key={l.id} className="space-y-2 p-3 text-sm">
+              <div className="grid grid-cols-3 gap-3">
+                <select
+                  value={loteEnEdicion.campo_id}
+                  onChange={(e) => setLoteEnEdicion({ ...loteEnEdicion, campo_id: e.target.value })}
+                  className="campo"
+                >
+                  {campos.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.nombre}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  type="text"
+                  value={loteEnEdicion.nombre}
+                  onChange={(e) => setLoteEnEdicion({ ...loteEnEdicion, nombre: e.target.value })}
+                  className="campo"
+                />
+                <input
+                  type="number"
+                  min="0.01"
+                  step="0.01"
+                  value={loteEnEdicion.hectareas}
+                  onChange={(e) => setLoteEnEdicion({ ...loteEnEdicion, hectareas: e.target.value })}
+                  className="campo"
+                />
+              </div>
+              {erroresEdicion.length > 0 && (
+                <ul className="rounded-md bg-red-50 p-2 text-xs text-red-700">
+                  {erroresEdicion.map((err) => (
+                    <li key={err}>{err}</li>
+                  ))}
+                </ul>
+              )}
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => guardarEdicion(l.id)}
+                  className="rounded-md bg-brand-primary px-3 py-1 text-xs text-white"
+                >
+                  Guardar
+                </button>
+                <button type="button" onClick={cancelarEdicion} className="text-xs text-gray-500 underline">
+                  Cancelar
+                </button>
+              </div>
+            </li>
+          ) : (
+            <li key={l.id} className="flex items-center justify-between p-3 text-sm">
+              <div>
+                <span className="text-gray-900">{l.nombre}</span>
+                <span className="ml-2 text-gray-500">({l.campo_nombre})</span>
+                {l.poligono && <span className="ml-2 text-xs text-brand-primary">· dibujado en mapa</span>}
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-gray-500">
+                  {l.hectareas} ha{l.perimetro_metros && ` · ${l.perimetro_metros} m perímetro`}
+                </span>
+                <button type="button" onClick={() => empezarEdicion(l)} className="text-xs text-brand-primary underline">
+                  Editar
+                </button>
+                <button type="button" onClick={() => desactivarLote(l)} className="text-xs text-red-600 underline">
+                  Desactivar
+                </button>
+              </div>
+            </li>
+          )
+        )}
         {lotes.length === 0 && <li className="p-3 text-sm text-gray-500">Todavía no hay lotes cargados.</li>}
       </ul>
     </div>

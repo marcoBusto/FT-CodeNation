@@ -91,4 +91,41 @@ final class InsumoControllerTest extends DatabaseTestCase
 
         $this->assertArrayHasKey('id', $resultado);
     }
+
+    public function testEditarPuedeCambiarMarcaSinChocarConsigoMismo(): void
+    {
+        $tenantId = $this->crearTenant();
+        $roundup = $this->crearMarca($tenantId, 'Roundup');
+        $panzerGold = $this->crearMarca($tenantId, 'Panzer Gold');
+        $insumoId = $this->crearInsumo($tenantId, 'Glifosato', 'litros', $roundup);
+
+        // Editar sin cambiar nada (misma marca) no debería chocar contra sí mismo.
+        $resultado = InsumoController::editar($tenantId, $insumoId, [
+            'nombre' => 'Glifosato',
+            'marca_id' => $roundup,
+            'unidad_medida' => 'litros',
+        ]);
+        $this->assertArrayHasKey('id', $resultado);
+
+        $resultado = InsumoController::editar($tenantId, $insumoId, [
+            'nombre' => 'Glifosato',
+            'marca_id' => $panzerGold,
+            'unidad_medida' => 'litros',
+        ]);
+        $this->assertArrayHasKey('id', $resultado);
+
+        $insumos = InsumoController::listar($tenantId);
+        $this->assertSame($panzerGold, $insumos[0]['marca_id']);
+    }
+
+    public function testEliminarLoSacaDelListado(): void
+    {
+        $tenantId = $this->crearTenant();
+        $insumoId = $this->crearInsumo($tenantId);
+
+        $resultado = InsumoController::eliminar($tenantId, $insumoId);
+
+        $this->assertArrayHasKey('id', $resultado);
+        $this->assertCount(0, InsumoController::listar($tenantId));
+    }
 }

@@ -53,6 +53,64 @@ class LoteController
         return ['id' => (int) $pdo->lastInsertId()];
     }
 
+    public static function editar(int $tenantId, int $id, array $datos): array
+    {
+        if (!self::existe($tenantId, $id)) {
+            return ['errores' => ['El lote indicado no existe.']];
+        }
+
+        $errores = self::validar($tenantId, $datos);
+        if (!empty($errores)) {
+            return ['errores' => $errores];
+        }
+
+        $pdo = Database::getConnection();
+        $stmt = $pdo->prepare(
+            'UPDATE lotes
+             SET campo_id = :campo_id, nombre = :nombre, hectareas = :hectareas,
+                 perimetro_metros = :perimetro_metros, poligono = :poligono
+             WHERE id = :id AND tenant_id = :tenant_id'
+        );
+        $stmt->execute([
+            'id' => $id,
+            'tenant_id' => $tenantId,
+            'campo_id' => (int) $datos['campo_id'],
+            'nombre' => trim($datos['nombre']),
+            'hectareas' => (float) $datos['hectareas'],
+            'perimetro_metros' => ($datos['perimetro_metros'] ?? '') !== '' ? (float) $datos['perimetro_metros'] : null,
+            'poligono' => !empty($datos['poligono']) ? json_encode($datos['poligono']) : null,
+        ]);
+
+        return ['id' => $id];
+    }
+
+    // Baja lógica: un lote con movimientos históricos no se puede borrar sin
+    // perder el rastro de esos movimientos (ver ledger inmutable en
+    // docs/DECISIONES.md), así que solo se marca inactivo.
+    public static function eliminar(int $tenantId, int $id): array
+    {
+        if (!self::existe($tenantId, $id)) {
+            return ['errores' => ['El lote indicado no existe.']];
+        }
+
+        $pdo = Database::getConnection();
+        $stmt = $pdo->prepare(
+            "UPDATE lotes SET estado = 'inactivo' WHERE id = :id AND tenant_id = :tenant_id"
+        );
+        $stmt->execute(['id' => $id, 'tenant_id' => $tenantId]);
+
+        return ['id' => $id];
+    }
+
+    private static function existe(int $tenantId, int $id): bool
+    {
+        $pdo = Database::getConnection();
+        $stmt = $pdo->prepare('SELECT 1 FROM lotes WHERE id = :id AND tenant_id = :tenant_id');
+        $stmt->execute(['id' => $id, 'tenant_id' => $tenantId]);
+
+        return (bool) $stmt->fetchColumn();
+    }
+
     // No persiste nada: es una estimación rápida para ayudar a planificar la
     // compra de insumo antes de registrar movimientos reales.
     public static function estimarInsumo(array $datos): array
