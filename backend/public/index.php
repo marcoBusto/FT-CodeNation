@@ -20,9 +20,15 @@ Database::inicializarEnv();
 
 // React corre en un origen distinto (puerto/dominio propio) al de esta API,
 // tanto en desarrollo como en producción, asi que el navegador exige estos
-// headers para permitir que el frontend lea la respuesta.
-$origenPermitido = Database::obtenerVariable('FRONTEND_URL', 'http://localhost:5173');
+// headers para permitir que el frontend lea la respuesta. FRONTEND_URL puede
+// listar varios orígenes separados por coma (ej. dominio propio + la URL
+// default de Vercel) porque Access-Control-Allow-Origin solo acepta un
+// valor a la vez: hay que reflejar el que matchee, no concatenarlos.
+$origenesPermitidos = array_map('trim', explode(',', Database::obtenerVariable('FRONTEND_URL', 'http://localhost:5173')));
+$origenSolicitado = $_SERVER['HTTP_ORIGIN'] ?? '';
+$origenPermitido = in_array($origenSolicitado, $origenesPermitidos, true) ? $origenSolicitado : $origenesPermitidos[0];
 header("Access-Control-Allow-Origin: {$origenPermitido}");
+header('Vary: Origin');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, X-Tenant-Id');
 header('Content-Type: application/json; charset=utf-8');
