@@ -91,7 +91,7 @@ function Movimientos() {
               {insumos.map((i) => (
                 <option key={i.id} value={i.id}>
                   {i.nombre}
-                  {i.marca && ` · ${i.marca}`} ({i.unidad_medida})
+                  {i.marca_nombre && ` · ${i.marca_nombre}`} ({i.unidad_medida})
                 </option>
               ))}
             </select>

@@ -20,7 +20,7 @@ abstract class DatabaseTestCase extends TestCase
             );
         }
 
-        foreach (['movimientos_insumo', 'insumos', 'lotes', 'campos', 'usuarios', 'tenants'] as $tabla) {
+        foreach (['movimientos_insumo', 'insumos', 'marcas', 'categorias', 'lotes', 'campos', 'usuarios', 'tenants'] as $tabla) {
             $this->pdo->exec("DELETE FROM {$tabla}");
         }
     }
@@ -73,13 +73,35 @@ abstract class DatabaseTestCase extends TestCase
         return (int) $this->pdo->lastInsertId();
     }
 
-    protected function crearInsumo(int $tenantId, string $nombre = 'Glifosato', string $unidad = 'litros', string $marca = ''): int
+    protected function crearInsumo(int $tenantId, string $nombre = 'Glifosato', string $unidad = 'litros', ?int $marcaId = null, ?int $categoriaId = null): int
     {
         $stmt = $this->pdo->prepare(
-            'INSERT INTO insumos (tenant_id, nombre, marca, unidad_medida)
-             VALUES (:tenant_id, :nombre, :marca, :unidad_medida)'
+            'INSERT INTO insumos (tenant_id, nombre, marca_id, categoria_id, unidad_medida)
+             VALUES (:tenant_id, :nombre, :marca_id, :categoria_id, :unidad_medida)'
         );
-        $stmt->execute(['tenant_id' => $tenantId, 'nombre' => $nombre, 'marca' => $marca, 'unidad_medida' => $unidad]);
+        $stmt->execute([
+            'tenant_id' => $tenantId,
+            'nombre' => $nombre,
+            'marca_id' => $marcaId,
+            'categoria_id' => $categoriaId,
+            'unidad_medida' => $unidad,
+        ]);
+
+        return (int) $this->pdo->lastInsertId();
+    }
+
+    protected function crearMarca(int $tenantId, string $nombre = 'Roundup'): int
+    {
+        $stmt = $this->pdo->prepare('INSERT INTO marcas (tenant_id, nombre) VALUES (:tenant_id, :nombre)');
+        $stmt->execute(['tenant_id' => $tenantId, 'nombre' => $nombre]);
+
+        return (int) $this->pdo->lastInsertId();
+    }
+
+    protected function crearCategoria(int $tenantId, string $nombre = 'Herbicida'): int
+    {
+        $stmt = $this->pdo->prepare('INSERT INTO categorias (tenant_id, nombre) VALUES (:tenant_id, :nombre)');
+        $stmt->execute(['tenant_id' => $tenantId, 'nombre' => $nombre]);
 
         return (int) $this->pdo->lastInsertId();
     }

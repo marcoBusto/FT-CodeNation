@@ -9,6 +9,8 @@ SET FOREIGN_KEY_CHECKS = 0;
 
 DROP TABLE IF EXISTS movimientos_insumo;
 DROP TABLE IF EXISTS insumos;
+DROP TABLE IF EXISTS marcas;
+DROP TABLE IF EXISTS categorias;
 DROP TABLE IF EXISTS lotes;
 DROP TABLE IF EXISTS campos;
 DROP TABLE IF EXISTS usuarios;
@@ -84,18 +86,44 @@ CREATE TABLE lotes (
     INDEX idx_lotes_campo (campo_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 5. INSUMOS
+-- 5. MARCAS (catálogo de marcas comerciales por tenant)
+CREATE TABLE marcas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id INT NOT NULL,
+    nombre VARCHAR(100) NOT NULL,
+    creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id),
+    UNIQUE KEY uq_marcas_tenant_nombre (tenant_id, nombre),
+    INDEX idx_marcas_tenant (tenant_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 6. CATEGORIAS (catálogo de categorías de insumo por tenant)
+CREATE TABLE categorias (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id INT NOT NULL,
+    nombre VARCHAR(100) NOT NULL,
+    creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id),
+    UNIQUE KEY uq_categorias_tenant_nombre (tenant_id, nombre),
+    INDEX idx_categorias_tenant (tenant_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 7. INSUMOS
 CREATE TABLE insumos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     tenant_id INT NOT NULL,
     nombre VARCHAR(150) NOT NULL,
-    marca VARCHAR(100) NOT NULL DEFAULT '',
+    marca_id INT NULL,
+    categoria_id INT NULL,
     unidad_medida ENUM('litros', 'kg', 'bolsas') NOT NULL,
     estado ENUM('activo', 'inactivo') NOT NULL DEFAULT 'activo',
     creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (tenant_id) REFERENCES tenants(id),
-    UNIQUE KEY uq_insumos_tenant_nombre_marca (tenant_id, nombre, marca),
-    INDEX idx_insumos_tenant (tenant_id)
+    FOREIGN KEY (marca_id) REFERENCES marcas(id),
+    FOREIGN KEY (categoria_id) REFERENCES categorias(id),
+    INDEX idx_insumos_tenant (tenant_id),
+    INDEX idx_insumos_marca (marca_id),
+    INDEX idx_insumos_categoria (categoria_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 6. MOVIMIENTOS DE INSUMO (Ledger Inmutable de Stock)

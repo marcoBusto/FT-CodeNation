@@ -12,6 +12,8 @@ require __DIR__ . '/../src/Tenant.php';
 require __DIR__ . '/../src/Controllers/CampoController.php';
 require __DIR__ . '/../src/Controllers/LoteController.php';
 require __DIR__ . '/../src/Controllers/InsumoController.php';
+require __DIR__ . '/../src/Controllers/MarcaController.php';
+require __DIR__ . '/../src/Controllers/CategoriaController.php';
 require __DIR__ . '/../src/Controllers/MovimientoInsumoController.php';
 
 // Carga el .env desde el arranque (no recién en la primera conexión a la
@@ -127,6 +129,26 @@ try {
 
     if ($ruta === '/insumos/stock' && $metodo === 'GET') {
         responder(InsumoController::stock($tenantId));
+        return;
+    }
+
+    if ($ruta === '/marcas' && $metodo === 'GET') {
+        responder(MarcaController::listar($tenantId));
+        return;
+    }
+
+    if ($ruta === '/marcas' && $metodo === 'POST') {
+        responderResultado(MarcaController::crear($tenantId, $cuerpo()), 201);
+        return;
+    }
+
+    if ($ruta === '/categorias' && $metodo === 'GET') {
+        responder(CategoriaController::listar($tenantId));
+        return;
+    }
+
+    if ($ruta === '/categorias' && $metodo === 'POST') {
+        responderResultado(CategoriaController::crear($tenantId, $cuerpo()), 201);
         return;
     }
 

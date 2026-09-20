@@ -8,10 +8,14 @@ class InsumoController
     {
         $pdo = Database::getConnection();
         $stmt = $pdo->prepare(
-            "SELECT id, nombre, marca, unidad_medida, estado, creado_en
-             FROM insumos
-             WHERE tenant_id = :tenant_id AND estado = 'activo'
-             ORDER BY nombre"
+            "SELECT i.id, i.nombre, i.marca_id, m.nombre AS marca_nombre,
+                    i.categoria_id, c.nombre AS categoria_nombre,
+                    i.unidad_medida, i.estado, i.creado_en
+             FROM insumos i
+             LEFT JOIN marcas m ON m.id = i.marca_id
+             LEFT JOIN categorias c ON c.id = i.categoria_id
+             WHERE i.tenant_id = :tenant_id AND i.estado = 'activo'
+             ORDER BY i.nombre"
         );
         $stmt->execute(['tenant_id' => $tenantId]);
 
@@ -27,19 +31,22 @@ class InsumoController
             "SELECT
                 i.id,
                 i.nombre,
-                i.marca,
+                m.nombre AS marca_nombre,
+                c.nombre AS categoria_nombre,
                 i.unidad_medida,
                 COALESCE(SUM(
-                    CASE m.tipo
-                        WHEN 'ENTRADA' THEN m.cantidad_total
-                        WHEN 'EGRESO_LOTE' THEN -m.cantidad_total
-                        ELSE m.cantidad_total
+                    CASE mov.tipo
+                        WHEN 'ENTRADA' THEN mov.cantidad_total
+                        WHEN 'EGRESO_LOTE' THEN -mov.cantidad_total
+                        ELSE mov.cantidad_total
                     END
                 ), 0) AS stock_actual
              FROM insumos i
-             LEFT JOIN movimientos_insumo m ON m.insumo_id = i.id AND m.tenant_id = i.tenant_id
+             LEFT JOIN marcas m ON m.id = i.marca_id
+             LEFT JOIN categorias c ON c.id = i.categoria_id
+             LEFT JOIN movimientos_insumo mov ON mov.insumo_id = i.id AND mov.tenant_id = i.tenant_id
              WHERE i.tenant_id = :tenant_id AND i.estado = 'activo'
-             GROUP BY i.id, i.nombre, i.marca, i.unidad_medida
+             GROUP BY i.id, i.nombre, m.nombre, c.nombre, i.unidad_medida
              ORDER BY i.nombre"
         );
         $stmt->execute(['tenant_id' => $tenantId]);
@@ -56,36 +63,61 @@ class InsumoController
 
         $pdo = Database::getConnection();
         $stmt = $pdo->prepare(
-            'INSERT INTO insumos (tenant_id, nombre, marca, unidad_medida)
-             VALUES (:tenant_id, :nombre, :marca, :unidad_medida)'
+            'INSERT INTO insumos (tenant_id, nombre, marca_id, categoria_id, unidad_medida)
+             VALUES (:tenant_id, :nombre, :marca_id, :categoria_id, :unidad_medida)'
         );
         $stmt->execute([
             'tenant_id' => $tenantId,
             'nombre' => trim($datos['nombre']),
-            'marca' => trim($datos['marca'] ?? ''),
+            'marca_id' => self::idOpcional($datos['marca_id'] ?? null),
+            'categoria_id' => self::idOpcional($datos['categoria_id'] ?? null),
             'unidad_medida' => $datos['unidad_medida'],
         ]);
 
         return ['id' => (int) $pdo->lastInsertId()];
     }
 
+    private static function idOpcional(mixed $valor): ?int
+    {
+        return ($valor === null || $valor === '') ? null : (int) $valor;
+    }
+
     private static function validar(int $tenantId, array $datos): array
     {
         $errores = [];
         $nombre = trim($datos['nombre'] ?? '');
-        $marca = trim($datos['marca'] ?? '');
+        $marcaId = self::idOpcional($datos['marca_id'] ?? null);
+        $categoriaId = self::idOpcional($datos['categoria_id'] ?? null);
 
         if ($nombre === '') {
             $errores[] = 'Falta indicar el nombre del insumo.';
         } else {
             $pdo = Database::getConnection();
+            // "<=>" es el operador de igualdad NULL-safe de MySQL/MariaDB:
+            // sin él, "marca_id = NULL" nunca es verdadero y dejaría pasar
+            // duplicados de insumos sin marca cargada.
             $stmt = $pdo->prepare(
-                'SELECT 1 FROM insumos WHERE tenant_id = :tenant_id AND nombre = :nombre AND marca = :marca'
+                'SELECT 1 FROM insumos
+                 WHERE tenant_id = :tenant_id AND nombre = :nombre
+                   AND marca_id <=> :marca_id AND categoria_id <=> :categoria_id'
             );
-            $stmt->execute(['tenant_id' => $tenantId, 'nombre' => $nombre, 'marca' => $marca]);
+            $stmt->execute([
+                'tenant_id' => $tenantId,
+                'nombre' => $nombre,
+                'marca_id' => $marcaId,
+                'categoria_id' => $categoriaId,
+            ]);
             if ($stmt->fetchColumn()) {
-                $errores[] = 'Ya existe un insumo con ese nombre y esa marca.';
+                $errores[] = 'Ya existe un insumo con ese nombre, marca y categoría.';
             }
+        }
+
+        if ($marcaId !== null && !self::perteneceAlTenant($tenantId, 'marcas', $marcaId)) {
+            $errores[] = 'La marca indicada no existe.';
+        }
+
+        if ($categoriaId !== null && !self::perteneceAlTenant($tenantId, 'categorias', $categoriaId)) {
+            $errores[] = 'La categoría indicada no existe.';
         }
 
         if (!in_array($datos['unidad_medida'] ?? '', self::UNIDADES_VALIDAS, true)) {
@@ -93,5 +125,14 @@ class InsumoController
         }
 
         return $errores;
+    }
+
+    private static function perteneceAlTenant(int $tenantId, string $tabla, int $id): bool
+    {
+        $pdo = Database::getConnection();
+        $stmt = $pdo->prepare("SELECT 1 FROM {$tabla} WHERE id = :id AND tenant_id = :tenant_id");
+        $stmt->execute(['id' => $id, 'tenant_id' => $tenantId]);
+
+        return (bool) $stmt->fetchColumn();
     }
 }

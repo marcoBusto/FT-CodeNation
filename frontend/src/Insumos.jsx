@@ -1,11 +1,16 @@
 import { useEffect, useState } from 'react'
 import { apiFetch } from './api'
 
-const INSUMO_VACIO = { nombre: '', marca: '', unidad_medida: 'litros' }
+const NUEVA_OPCION = '__nueva__'
+const INSUMO_VACIO = { nombre: '', marca_id: '', categoria_id: '', unidad_medida: 'litros' }
 
 function Insumos() {
   const [stock, setStock] = useState([])
+  const [marcas, setMarcas] = useState([])
+  const [categorias, setCategorias] = useState([])
   const [nuevoInsumo, setNuevoInsumo] = useState(INSUMO_VACIO)
+  const [nuevaMarcaNombre, setNuevaMarcaNombre] = useState('')
+  const [nuevaCategoriaNombre, setNuevaCategoriaNombre] = useState('')
   const [errores, setErrores] = useState([])
   const [error, setError] = useState(null)
 
@@ -18,24 +23,57 @@ function Insumos() {
       .catch((err) => setError(err.message))
   }
 
-  useEffect(cargarStock, [])
+  const cargarCatalogos = () => {
+    apiFetch('/marcas').then((res) => setMarcas(res.data ?? []))
+    apiFetch('/categorias').then((res) => setCategorias(res.data ?? []))
+  }
+
+  useEffect(() => {
+    cargarStock()
+    cargarCatalogos()
+  }, [])
 
   const actualizarInsumo = (campo) => (evento) => {
     setNuevoInsumo({ ...nuevoInsumo, [campo]: evento.target.value })
+  }
+
+  // Si el usuario eligió "+ Nueva marca/categoría...", primero la crea y
+  // recién con el id que devuelve arma el insumo. Evita una pantalla aparte
+  // solo para administrar catálogos chicos.
+  const resolverIdCatalogo = (ruta, valorSeleccionado, nombreNuevo) => {
+    if (valorSeleccionado !== NUEVA_OPCION) {
+      return Promise.resolve(valorSeleccionado || '')
+    }
+    return apiFetch(ruta, { method: 'POST', body: JSON.stringify({ nombre: nombreNuevo }) }).then((res) => {
+      if (res.error) throw new Error(res.error.mensaje)
+      return String(res.data.id)
+    })
   }
 
   const crearInsumo = (evento) => {
     evento.preventDefault()
     setErrores([])
 
-    apiFetch('/insumos', { method: 'POST', body: JSON.stringify(nuevoInsumo) }).then((res) => {
-      if (res.error) {
-        setErrores(res.error.detalles ?? [res.error.mensaje])
-      } else {
+    Promise.all([
+      resolverIdCatalogo('/marcas', nuevoInsumo.marca_id, nuevaMarcaNombre),
+      resolverIdCatalogo('/categorias', nuevoInsumo.categoria_id, nuevaCategoriaNombre),
+    ])
+      .then(([marca_id, categoria_id]) => {
+        const cuerpo = { ...nuevoInsumo, marca_id, categoria_id }
+        return apiFetch('/insumos', { method: 'POST', body: JSON.stringify(cuerpo) })
+      })
+      .then((res) => {
+        if (res.error) {
+          setErrores(res.error.detalles ?? [res.error.mensaje])
+          return
+        }
         setNuevoInsumo(INSUMO_VACIO)
+        setNuevaMarcaNombre('')
+        setNuevaCategoriaNombre('')
         cargarStock()
-      }
-    })
+        cargarCatalogos()
+      })
+      .catch((err) => setErrores([err.message]))
   }
 
   return (
@@ -48,7 +86,7 @@ function Insumos() {
 
       <form onSubmit={crearInsumo} className="space-y-3 rounded-md border border-gray-200 p-4">
         <h2 className="text-sm font-medium text-brand-primary-dark">Nuevo insumo</h2>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           <label className="block">
             <span className="text-sm text-gray-700">Nombre</span>
             <input
@@ -60,13 +98,52 @@ function Insumos() {
             />
           </label>
           <label className="block">
-            <span className="text-sm text-gray-700">Marca (opcional)</span>
-            <input
-              type="text"
-              value={nuevoInsumo.marca}
-              onChange={actualizarInsumo('marca')}
+            <span className="text-sm text-gray-700">Marca</span>
+            <select value={nuevoInsumo.marca_id} onChange={actualizarInsumo('marca_id')} className="campo mt-1">
+              <option value="">Sin marca</option>
+              {marcas.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.nombre}
+                </option>
+              ))}
+              <option value={NUEVA_OPCION}>+ Nueva marca...</option>
+            </select>
+            {nuevoInsumo.marca_id === NUEVA_OPCION && (
+              <input
+                type="text"
+                required
+                placeholder="Nombre de la marca"
+                value={nuevaMarcaNombre}
+                onChange={(e) => setNuevaMarcaNombre(e.target.value)}
+                className="campo mt-1"
+              />
+            )}
+          </label>
+          <label className="block">
+            <span className="text-sm text-gray-700">Categoría</span>
+            <select
+              value={nuevoInsumo.categoria_id}
+              onChange={actualizarInsumo('categoria_id')}
               className="campo mt-1"
-            />
+            >
+              <option value="">Sin categoría</option>
+              {categorias.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.nombre}
+                </option>
+              ))}
+              <option value={NUEVA_OPCION}>+ Nueva categoría...</option>
+            </select>
+            {nuevoInsumo.categoria_id === NUEVA_OPCION && (
+              <input
+                type="text"
+                required
+                placeholder="Nombre de la categoría"
+                value={nuevaCategoriaNombre}
+                onChange={(e) => setNuevaCategoriaNombre(e.target.value)}
+                className="campo mt-1"
+              />
+            )}
           </label>
           <label className="block">
             <span className="text-sm text-gray-700">Unidad de medida</span>
@@ -104,7 +181,8 @@ function Insumos() {
           <li key={i.id} className="flex items-center justify-between p-3 text-sm">
             <span className="text-gray-900">
               {i.nombre}
-              {i.marca && <span className="text-gray-500"> · {i.marca}</span>}
+              {i.marca_nombre && <span className="text-gray-500"> · {i.marca_nombre}</span>}
+              {i.categoria_nombre && <span className="ml-2 text-xs text-brand-primary">{i.categoria_nombre}</span>}
             </span>
             <span className={Number(i.stock_actual) <= 0 ? 'font-medium text-red-600' : 'text-gray-500'}>
               {i.stock_actual} {i.unidad_medida}
