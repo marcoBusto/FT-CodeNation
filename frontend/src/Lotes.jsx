@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { apiFetch } from './api'
+import MapaLote from './MapaLote'
 
 const LOTE_VACIO = { campo_id: '', nombre: '', hectareas: '' }
 
@@ -7,6 +8,8 @@ function Lotes() {
   const [lotes, setLotes] = useState([])
   const [campos, setCampos] = useState([])
   const [nuevoLote, setNuevoLote] = useState(LOTE_VACIO)
+  const [poligono, setPoligono] = useState(null)
+  const [mapaKey, setMapaKey] = useState(0)
   const [errores, setErrores] = useState([])
   const [error, setError] = useState(null)
 
@@ -28,15 +31,28 @@ function Lotes() {
     setNuevoLote({ ...nuevoLote, [campo]: evento.target.value })
   }
 
+  const alCompletarPoligono = (resultado) => {
+    setPoligono(resultado)
+    setNuevoLote((actual) => ({ ...actual, hectareas: String(resultado.areaHectareas) }))
+  }
+
   const crearLote = (evento) => {
     evento.preventDefault()
     setErrores([])
 
-    apiFetch('/lotes', { method: 'POST', body: JSON.stringify(nuevoLote) }).then((res) => {
+    const cuerpo = {
+      ...nuevoLote,
+      perimetro_metros: poligono?.perimetroMetros ?? '',
+      poligono: poligono?.coordenadas ?? null,
+    }
+
+    apiFetch('/lotes', { method: 'POST', body: JSON.stringify(cuerpo) }).then((res) => {
       if (res.error) {
         setErrores(res.error.detalles ?? [res.error.mensaje])
       } else {
         setNuevoLote(LOTE_VACIO)
+        setPoligono(null)
+        setMapaKey((k) => k + 1)
         cargarLotes()
       }
     })
@@ -88,6 +104,14 @@ function Lotes() {
           </label>
         </div>
 
+        <div>
+          <span className="text-sm text-gray-700">Dibujar el lote en el mapa (opcional)</span>
+          <p className="mb-2 text-xs text-gray-400">
+            Al terminar el polígono se completan las hectáreas solas — igual las podés ajustar a mano.
+          </p>
+          <MapaLote key={mapaKey} onPoligonoCompleto={alCompletarPoligono} />
+        </div>
+
         {errores.length > 0 && (
           <ul className="rounded-md bg-red-50 p-3 text-sm text-red-700">
             {errores.map((err) => (
@@ -110,8 +134,11 @@ function Lotes() {
             <div>
               <span className="text-gray-900">{l.nombre}</span>
               <span className="ml-2 text-gray-500">({l.campo_nombre})</span>
+              {l.poligono && <span className="ml-2 text-xs text-brand-primary">· dibujado en mapa</span>}
             </div>
-            <span className="text-gray-500">{l.hectareas} ha</span>
+            <span className="text-gray-500">
+              {l.hectareas} ha{l.perimetro_metros && ` · ${l.perimetro_metros} m perímetro`}
+            </span>
           </li>
         ))}
         {lotes.length === 0 && <li className="p-3 text-sm text-gray-500">Todavía no hay lotes cargados.</li>}
