@@ -31,4 +31,32 @@ final class InsumoControllerTest extends DatabaseTestCase
 
         $this->assertArrayHasKey('errores', $resultado);
     }
+
+    public function testCrearPermiteElMismoNombreConMarcaDistinta(): void
+    {
+        $tenantId = $this->crearTenant();
+        $this->crearInsumo($tenantId, 'Glifosato', 'litros', 'Roundup');
+
+        $resultado = InsumoController::crear($tenantId, [
+            'nombre' => 'Glifosato',
+            'marca' => 'Panzer Gold',
+            'unidad_medida' => 'litros',
+        ]);
+
+        $this->assertArrayHasKey('id', $resultado);
+    }
+
+    public function testCrearRechazaMismoNombreYMismaMarca(): void
+    {
+        $tenantId = $this->crearTenant();
+        $this->crearInsumo($tenantId, 'Glifosato', 'litros', 'Roundup');
+
+        $resultado = InsumoController::crear($tenantId, [
+            'nombre' => 'Glifosato',
+            'marca' => 'Roundup',
+            'unidad_medida' => 'litros',
+        ]);
+
+        $this->assertArrayHasKey('errores', $resultado);
+    }
 }

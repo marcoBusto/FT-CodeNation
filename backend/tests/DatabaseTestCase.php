@@ -73,13 +73,13 @@ abstract class DatabaseTestCase extends TestCase
         return (int) $this->pdo->lastInsertId();
     }
 
-    protected function crearInsumo(int $tenantId, string $nombre = 'Glifosato', string $unidad = 'litros'): int
+    protected function crearInsumo(int $tenantId, string $nombre = 'Glifosato', string $unidad = 'litros', string $marca = ''): int
     {
         $stmt = $this->pdo->prepare(
-            'INSERT INTO insumos (tenant_id, nombre, unidad_medida)
-             VALUES (:tenant_id, :nombre, :unidad_medida)'
+            'INSERT INTO insumos (tenant_id, nombre, marca, unidad_medida)
+             VALUES (:tenant_id, :nombre, :marca, :unidad_medida)'
         );
-        $stmt->execute(['tenant_id' => $tenantId, 'nombre' => $nombre, 'unidad_medida' => $unidad]);
+        $stmt->execute(['tenant_id' => $tenantId, 'nombre' => $nombre, 'marca' => $marca, 'unidad_medida' => $unidad]);
 
         return (int) $this->pdo->lastInsertId();
     }

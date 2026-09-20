@@ -8,7 +8,7 @@ class InsumoController
     {
         $pdo = Database::getConnection();
         $stmt = $pdo->prepare(
-            "SELECT id, nombre, unidad_medida, estado, creado_en
+            "SELECT id, nombre, marca, unidad_medida, estado, creado_en
              FROM insumos
              WHERE tenant_id = :tenant_id AND estado = 'activo'
              ORDER BY nombre"
@@ -27,6 +27,7 @@ class InsumoController
             "SELECT
                 i.id,
                 i.nombre,
+                i.marca,
                 i.unidad_medida,
                 COALESCE(SUM(
                     CASE m.tipo
@@ -38,7 +39,7 @@ class InsumoController
              FROM insumos i
              LEFT JOIN movimientos_insumo m ON m.insumo_id = i.id AND m.tenant_id = i.tenant_id
              WHERE i.tenant_id = :tenant_id AND i.estado = 'activo'
-             GROUP BY i.id, i.nombre, i.unidad_medida
+             GROUP BY i.id, i.nombre, i.marca, i.unidad_medida
              ORDER BY i.nombre"
         );
         $stmt->execute(['tenant_id' => $tenantId]);
@@ -55,12 +56,13 @@ class InsumoController
 
         $pdo = Database::getConnection();
         $stmt = $pdo->prepare(
-            'INSERT INTO insumos (tenant_id, nombre, unidad_medida)
-             VALUES (:tenant_id, :nombre, :unidad_medida)'
+            'INSERT INTO insumos (tenant_id, nombre, marca, unidad_medida)
+             VALUES (:tenant_id, :nombre, :marca, :unidad_medida)'
         );
         $stmt->execute([
             'tenant_id' => $tenantId,
             'nombre' => trim($datos['nombre']),
+            'marca' => trim($datos['marca'] ?? ''),
             'unidad_medida' => $datos['unidad_medida'],
         ]);
 
@@ -71,17 +73,18 @@ class InsumoController
     {
         $errores = [];
         $nombre = trim($datos['nombre'] ?? '');
+        $marca = trim($datos['marca'] ?? '');
 
         if ($nombre === '') {
             $errores[] = 'Falta indicar el nombre del insumo.';
         } else {
             $pdo = Database::getConnection();
             $stmt = $pdo->prepare(
-                'SELECT 1 FROM insumos WHERE tenant_id = :tenant_id AND nombre = :nombre'
+                'SELECT 1 FROM insumos WHERE tenant_id = :tenant_id AND nombre = :nombre AND marca = :marca'
             );
-            $stmt->execute(['tenant_id' => $tenantId, 'nombre' => $nombre]);
+            $stmt->execute(['tenant_id' => $tenantId, 'nombre' => $nombre, 'marca' => $marca]);
             if ($stmt->fetchColumn()) {
-                $errores[] = 'Ya existe un insumo con ese nombre.';
+                $errores[] = 'Ya existe un insumo con ese nombre y esa marca.';
             }
         }
 

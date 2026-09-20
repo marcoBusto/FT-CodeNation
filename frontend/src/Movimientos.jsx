@@ -90,7 +90,8 @@ function Movimientos() {
               <option value="">Elegir...</option>
               {insumos.map((i) => (
                 <option key={i.id} value={i.id}>
-                  {i.nombre} ({i.unidad_medida})
+                  {i.nombre}
+                  {i.marca && ` · ${i.marca}`} ({i.unidad_medida})
                 </option>
               ))}
             </select>

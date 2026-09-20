@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { apiFetch } from './api'
 
-const INSUMO_VACIO = { nombre: '', unidad_medida: 'litros' }
+const INSUMO_VACIO = { nombre: '', marca: '', unidad_medida: 'litros' }
 
 function Insumos() {
   const [stock, setStock] = useState([])
@@ -48,7 +48,7 @@ function Insumos() {
 
       <form onSubmit={crearInsumo} className="space-y-3 rounded-md border border-gray-200 p-4">
         <h2 className="text-sm font-medium text-brand-primary-dark">Nuevo insumo</h2>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-3 gap-3">
           <label className="block">
             <span className="text-sm text-gray-700">Nombre</span>
             <input
@@ -56,6 +56,15 @@ function Insumos() {
               required
               value={nuevoInsumo.nombre}
               onChange={actualizarInsumo('nombre')}
+              className="campo mt-1"
+            />
+          </label>
+          <label className="block">
+            <span className="text-sm text-gray-700">Marca (opcional)</span>
+            <input
+              type="text"
+              value={nuevoInsumo.marca}
+              onChange={actualizarInsumo('marca')}
               className="campo mt-1"
             />
           </label>
@@ -93,7 +102,10 @@ function Insumos() {
       <ul className="divide-y divide-gray-200 rounded-md border border-gray-200">
         {stock.map((i) => (
           <li key={i.id} className="flex items-center justify-between p-3 text-sm">
-            <span className="text-gray-900">{i.nombre}</span>
+            <span className="text-gray-900">
+              {i.nombre}
+              {i.marca && <span className="text-gray-500"> · {i.marca}</span>}
+            </span>
             <span className={Number(i.stock_actual) <= 0 ? 'font-medium text-red-600' : 'text-gray-500'}>
               {i.stock_actual} {i.unidad_medida}
             </span>

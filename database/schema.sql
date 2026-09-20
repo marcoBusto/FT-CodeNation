@@ -89,11 +89,12 @@ CREATE TABLE insumos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     tenant_id INT NOT NULL,
     nombre VARCHAR(150) NOT NULL,
+    marca VARCHAR(100) NOT NULL DEFAULT '',
     unidad_medida ENUM('litros', 'kg', 'bolsas') NOT NULL,
     estado ENUM('activo', 'inactivo') NOT NULL DEFAULT 'activo',
     creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (tenant_id) REFERENCES tenants(id),
-    UNIQUE KEY uq_insumos_tenant_nombre (tenant_id, nombre),
+    UNIQUE KEY uq_insumos_tenant_nombre_marca (tenant_id, nombre, marca),
     INDEX idx_insumos_tenant (tenant_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
