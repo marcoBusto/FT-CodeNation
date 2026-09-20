@@ -14,7 +14,7 @@ export function cargarGoogleMaps() {
     }
 
     const script = document.createElement('script')
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=geometry`
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=geometry&loading=async`
     script.async = true
     script.onload = () => resolve(window.google.maps)
     script.onerror = () => reject(new Error('No se pudo cargar Google Maps.'))
