@@ -7,6 +7,7 @@ ini_set('display_errors', '0');
 ini_set('log_errors', '1');
 error_reporting(E_ALL);
 
+require __DIR__ . '/../vendor/autoload.php';
 require __DIR__ . '/../config/Database.php';
 require __DIR__ . '/../src/Tenant.php';
 require __DIR__ . '/../src/Controllers/CampoController.php';
@@ -18,6 +19,7 @@ require __DIR__ . '/../src/Controllers/MovimientoInsumoController.php';
 require __DIR__ . '/../src/Controllers/LaborController.php';
 require __DIR__ . '/../src/Controllers/EstacionCombustibleController.php';
 require __DIR__ . '/../src/Controllers/CombustibleController.php';
+require __DIR__ . '/../src/Controllers/ReporteController.php';
 
 // Carga el .env desde el arranque (no recién en la primera conexión a la
 // base) porque el header CORS de acá abajo lo necesita ya mismo.
@@ -267,6 +269,20 @@ try {
 
     if ($ruta === '/combustible/estimar' && $metodo === 'POST') {
         responderResultado(CombustibleController::estimar($tenantId, $cuerpo()));
+        return;
+    }
+
+    if ($ruta === '/reportes/campos-lotes' && $metodo === 'GET') {
+        header('Content-Type: application/pdf');
+        header('Content-Disposition: inline; filename="campos-lotes.pdf"');
+        echo ReporteController::pdfCamposLotes($tenantId);
+        return;
+    }
+
+    if ($ruta === '/reportes/insumos-stock' && $metodo === 'GET') {
+        header('Content-Type: application/pdf');
+        header('Content-Disposition: inline; filename="insumos-stock.pdf"');
+        echo ReporteController::pdfInsumosStock($tenantId);
         return;
     }
 

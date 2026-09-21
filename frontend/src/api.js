@@ -23,3 +23,14 @@ export function apiFetch(ruta, opciones = {}) {
     },
   }).then((res) => res.json())
 }
+
+// Para endpoints que devuelven un archivo (ej. los PDF de /reportes) en vez
+// de JSON: acá no hay contrato {data, error} que parsear.
+export function apiFetchBlob(ruta) {
+  return fetch(`${API_URL}${ruta}`, {
+    headers: { 'X-Tenant-Id': obtenerTenantId() },
+  }).then((res) => {
+    if (!res.ok) throw new Error('No se pudo generar el reporte.')
+    return res.blob()
+  })
+}
