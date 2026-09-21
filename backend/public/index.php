@@ -15,6 +15,9 @@ require __DIR__ . '/../src/Controllers/InsumoController.php';
 require __DIR__ . '/../src/Controllers/MarcaController.php';
 require __DIR__ . '/../src/Controllers/CategoriaController.php';
 require __DIR__ . '/../src/Controllers/MovimientoInsumoController.php';
+require __DIR__ . '/../src/Controllers/LaborController.php';
+require __DIR__ . '/../src/Controllers/EstacionCombustibleController.php';
+require __DIR__ . '/../src/Controllers/CombustibleController.php';
 
 // Carga el .env desde el arranque (no recién en la primera conexión a la
 // base) porque el header CORS de acá abajo lo necesita ya mismo.
@@ -219,6 +222,51 @@ try {
 
     if ($ruta === '/movimientos' && $metodo === 'POST') {
         responderResultado(MovimientoInsumoController::registrar($tenantId, $cuerpo()), 201);
+        return;
+    }
+
+    if ($ruta === '/labores' && $metodo === 'GET') {
+        responder(LaborController::listar($tenantId));
+        return;
+    }
+
+    if ($ruta === '/labores' && $metodo === 'POST') {
+        responderResultado(LaborController::crear($tenantId, $cuerpo()), 201);
+        return;
+    }
+
+    if (($id = $idDeRuta('labores')) !== null && $metodo === 'PUT') {
+        responderResultado(LaborController::editar($tenantId, $id, $cuerpo()));
+        return;
+    }
+
+    if (($id = $idDeRuta('labores')) !== null && $metodo === 'DELETE') {
+        responderResultado(LaborController::eliminar($tenantId, $id));
+        return;
+    }
+
+    if ($ruta === '/estaciones-combustible' && $metodo === 'GET') {
+        responder(EstacionCombustibleController::listar($tenantId));
+        return;
+    }
+
+    if ($ruta === '/estaciones-combustible' && $metodo === 'POST') {
+        responderResultado(EstacionCombustibleController::crear($tenantId, $cuerpo()), 201);
+        return;
+    }
+
+    if (($id = $idDeRuta('estaciones-combustible')) !== null && $metodo === 'PUT') {
+        responderResultado(EstacionCombustibleController::editar($tenantId, $id, $cuerpo()));
+        return;
+    }
+
+    if (($id = $idDeRuta('estaciones-combustible')) !== null && $metodo === 'DELETE') {
+        responderResultado(EstacionCombustibleController::eliminar($tenantId, $id));
+        return;
+    }
+
+    if ($ruta === '/combustible/estimar' && $metodo === 'POST') {
+        responderResultado(CombustibleController::estimar($tenantId, $cuerpo()));
         return;
     }
 

@@ -4,6 +4,7 @@ import Campos from './Campos'
 import Lotes from './Lotes'
 import Insumos from './Insumos'
 import Movimientos from './Movimientos'
+import Combustible from './Combustible'
 
 function App() {
   const [tenantId, setTenantId] = useState(obtenerTenantId())
@@ -41,6 +42,9 @@ function App() {
           <Pestaña activa={vista === 'movimientos'} onClick={() => setVista('movimientos')}>
             Movimientos
           </Pestaña>
+          <Pestaña activa={vista === 'combustible'} onClick={() => setVista('combustible')}>
+            Combustible
+          </Pestaña>
         </nav>
       </header>
 
@@ -49,6 +53,7 @@ function App() {
         {vista === 'lotes' && <Lotes />}
         {vista === 'insumos' && <Insumos />}
         {vista === 'movimientos' && <Movimientos />}
+        {vista === 'combustible' && <Combustible />}
       </main>
 
       <footer className="mt-12 flex items-center gap-2 border-t border-gray-200 pt-4 text-xs text-gray-400">

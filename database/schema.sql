@@ -11,6 +11,8 @@ DROP TABLE IF EXISTS movimientos_insumo;
 DROP TABLE IF EXISTS insumos;
 DROP TABLE IF EXISTS marcas;
 DROP TABLE IF EXISTS categorias;
+DROP TABLE IF EXISTS estaciones_combustible;
+DROP TABLE IF EXISTS labores;
 DROP TABLE IF EXISTS lotes;
 DROP TABLE IF EXISTS campos;
 DROP TABLE IF EXISTS usuarios;
@@ -158,4 +160,32 @@ CREATE TABLE movimientos_insumo (
     INDEX idx_mov_insumo_insumo (insumo_id),
     INDEX idx_mov_insumo_lote (lote_id),
     INDEX idx_mov_insumo_fecha (fecha_hora)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 8. LABORES (catálogo de labores agrícolas con consumo de combustible por
+-- hectárea, ej. "Pulverización" ~3 l/ha) para el calculador estimativo de
+-- combustible.
+CREATE TABLE labores (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id INT NOT NULL,
+    nombre VARCHAR(100) NOT NULL,
+    litros_por_hectarea DECIMAL(6, 2) NOT NULL,
+    creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id),
+    UNIQUE KEY uq_labores_tenant_nombre (tenant_id, nombre),
+    INDEX idx_labores_tenant (tenant_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 9. ESTACIONES DE COMBUSTIBLE (precio de referencia cargado a mano por el
+-- usuario; no hay fuente pública gratuita de precios por surtidor/zona en
+-- Argentina, ver docs/DECISIONES.md).
+CREATE TABLE estaciones_combustible (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id INT NOT NULL,
+    nombre VARCHAR(100) NOT NULL,
+    precio_por_litro DECIMAL(10, 2) NOT NULL,
+    actualizado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id),
+    UNIQUE KEY uq_estaciones_tenant_nombre (tenant_id, nombre),
+    INDEX idx_estaciones_tenant (tenant_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

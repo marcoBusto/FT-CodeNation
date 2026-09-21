@@ -20,7 +20,7 @@ abstract class DatabaseTestCase extends TestCase
             );
         }
 
-        foreach (['movimientos_insumo', 'insumos', 'marcas', 'categorias', 'lotes', 'campos', 'usuarios', 'tenants'] as $tabla) {
+        foreach (['movimientos_insumo', 'insumos', 'marcas', 'categorias', 'estaciones_combustible', 'labores', 'lotes', 'campos', 'usuarios', 'tenants'] as $tabla) {
             $this->pdo->exec("DELETE FROM {$tabla}");
         }
     }
@@ -102,6 +102,26 @@ abstract class DatabaseTestCase extends TestCase
     {
         $stmt = $this->pdo->prepare('INSERT INTO categorias (tenant_id, nombre) VALUES (:tenant_id, :nombre)');
         $stmt->execute(['tenant_id' => $tenantId, 'nombre' => $nombre]);
+
+        return (int) $this->pdo->lastInsertId();
+    }
+
+    protected function crearLabor(int $tenantId, string $nombre = 'Pulverización', float $litrosPorHectarea = 3.0): int
+    {
+        $stmt = $this->pdo->prepare(
+            'INSERT INTO labores (tenant_id, nombre, litros_por_hectarea) VALUES (:tenant_id, :nombre, :litros)'
+        );
+        $stmt->execute(['tenant_id' => $tenantId, 'nombre' => $nombre, 'litros' => $litrosPorHectarea]);
+
+        return (int) $this->pdo->lastInsertId();
+    }
+
+    protected function crearEstacionCombustible(int $tenantId, string $nombre = 'YPF Leones', float $precioPorLitro = 900.0): int
+    {
+        $stmt = $this->pdo->prepare(
+            'INSERT INTO estaciones_combustible (tenant_id, nombre, precio_por_litro) VALUES (:tenant_id, :nombre, :precio)'
+        );
+        $stmt->execute(['tenant_id' => $tenantId, 'nombre' => $nombre, 'precio' => $precioPorLitro]);
 
         return (int) $this->pdo->lastInsertId();
     }
