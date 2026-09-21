@@ -83,3 +83,29 @@ Registro de decisiones importantes del proyecto y su justificación, para no per
 **Cálculo en el backend, no en el cliente:** se agregó `POST /lotes/estimar-insumo` (`hectareas × dosis_por_ha`) como ayuda para planificar compras de insumo antes de registrar un movimiento real. No persiste nada — es una estimación descartable. `dosis_por_ha` no tiene un valor por defecto fijo en el sistema (varía por insumo/cultivo); lo indica el usuario en cada estimación, para no inventar una regla de negocio no definida.
 
 ---
+
+## 2026-09-21 — Ubicación de campos: coordenadas reales (mapa) en vez de solo texto libre
+
+**Decisión:** `campos` suma `latitud`/`longitud` (DECIMAL, opcionales). Se completan arrastrando un marcador en un mapa (`frontend/src/MapaCampo.jsx`), reutilizando el mismo script de Google Maps que ya cargaba `MapaLote.jsx` — sin agregar una API nueva ni un costo adicional. El campo de texto libre `ubicacion` se mantiene como referencia adicional opcional (ej. "tranquera azul").
+
+**Motivo:** pedido del usuario en auditoría (2026-09-21): reemplazar el texto libre por una ubicación real. Se descartó un desplegable de ciudades fijas (alternativa más simple pero menos precisa) a favor del mapa, decisión tomada por el usuario tras comparar alternativas.
+
+---
+
+## 2026-09-21 — Combustible: catálogo de labores + estaciones con precio manual, calculador sin persistencia
+
+**Decisión:** se agregan dos catálogos nuevos por tenant — `labores` (litros por hectárea estimados, ej. "Pulverización" ~3 l/ha) y `estaciones_combustible` (precio por litro cargado a mano). Con eso, `POST /combustible/estimar` calcula litros y costo estimados para un lote (`hectareas × litros_por_hectarea × precio_por_litro`). No persiste nada, mismo criterio que `estimarInsumo`.
+
+**Motivo:** pedido del usuario en auditoría (2026-09-21). Se descartó buscar el precio de combustible automáticamente desde una fuente online porque **no existe una API pública y gratuita confiable de precios por surtidor/zona en Argentina** — la alternativa real sería scraping frágil (se rompe si la página fuente cambia) o un servicio de terceros pago. El usuario eligió carga manual explícitamente por esto. Tampoco se agregó un catálogo de "maquinaria": el usuario eligió que el consumo dependa de la labor, no del equipo usado.
+
+**Dato específico del usuario, no hardcodeado:** las estaciones reales mencionadas (Gulf Agro, Axion, YPF — Leones, Córdoba) no se precargaron en el sistema porque es multi-tenant y esos datos son propios del negocio del usuario, no una regla general de la aplicación. Las carga el usuario mismo desde la pestaña Combustible.
+
+---
+
+## 2026-09-21 — Reportes: PDF generado en el backend (dompdf) + impresión y WhatsApp resueltos en el navegador
+
+**Decisión:** se agregó `dompdf/dompdf` (primera dependencia de negocio del backend — antes solo había dependencias de test) para generar PDF de dos reportes (`campos-lotes`, `insumos-stock`) desde HTML armado en `ReporteController`. "Imprimir" no usa el backend: abre una pestaña con una vista imprimible y llama al diálogo nativo del navegador. "Compartir por WhatsApp" intenta la Web Share API (`navigator.share` con el PDF como archivo adjunto, funciona en navegadores de celular) y si no está disponible cae a un link `wa.me` con aviso de que hay que adjuntar el PDF a mano.
+
+**Motivo:** pedido del usuario en auditoría (2026-09-21). Se descartó integrar la WhatsApp Business API (envío 100% automático) porque requiere una cuenta business con costo por mensaje y aprobación — desproporcionado para el pedido ("enviar por WhatsApp o imprimir o descargar"). El usuario eligió la opción sin costo, aceptando que en navegadores de escritorio el adjunto del PDF sea manual.
+
+---
