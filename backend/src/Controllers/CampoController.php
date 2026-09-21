@@ -6,7 +6,7 @@ class CampoController
     {
         $pdo = Database::getConnection();
         $stmt = $pdo->prepare(
-            "SELECT id, nombre, ubicacion, estado, creado_en
+            "SELECT id, nombre, ubicacion, latitud, longitud, estado, creado_en
              FROM campos
              WHERE tenant_id = :tenant_id AND estado = 'activo'
              ORDER BY nombre"
@@ -25,13 +25,15 @@ class CampoController
 
         $pdo = Database::getConnection();
         $stmt = $pdo->prepare(
-            'INSERT INTO campos (tenant_id, nombre, ubicacion)
-             VALUES (:tenant_id, :nombre, :ubicacion)'
+            'INSERT INTO campos (tenant_id, nombre, ubicacion, latitud, longitud)
+             VALUES (:tenant_id, :nombre, :ubicacion, :latitud, :longitud)'
         );
         $stmt->execute([
             'tenant_id' => $tenantId,
             'nombre' => trim($datos['nombre']),
             'ubicacion' => ($datos['ubicacion'] ?? '') !== '' ? trim($datos['ubicacion']) : null,
+            'latitud' => self::coordenadaOpcional($datos['latitud'] ?? null),
+            'longitud' => self::coordenadaOpcional($datos['longitud'] ?? null),
         ]);
 
         return ['id' => (int) $pdo->lastInsertId()];
@@ -50,7 +52,7 @@ class CampoController
 
         $pdo = Database::getConnection();
         $stmt = $pdo->prepare(
-            'UPDATE campos SET nombre = :nombre, ubicacion = :ubicacion
+            'UPDATE campos SET nombre = :nombre, ubicacion = :ubicacion, latitud = :latitud, longitud = :longitud
              WHERE id = :id AND tenant_id = :tenant_id'
         );
         $stmt->execute([
@@ -58,6 +60,8 @@ class CampoController
             'tenant_id' => $tenantId,
             'nombre' => trim($datos['nombre']),
             'ubicacion' => ($datos['ubicacion'] ?? '') !== '' ? trim($datos['ubicacion']) : null,
+            'latitud' => self::coordenadaOpcional($datos['latitud'] ?? null),
+            'longitud' => self::coordenadaOpcional($datos['longitud'] ?? null),
         ]);
 
         return ['id' => $id];
@@ -98,6 +102,21 @@ class CampoController
             $errores[] = 'Falta indicar el nombre del campo.';
         }
 
+        $latitud = $datos['latitud'] ?? '';
+        if ($latitud !== '' && $latitud !== null && (!is_numeric($latitud) || (float) $latitud < -90 || (float) $latitud > 90)) {
+            $errores[] = 'La latitud debe ser un número entre -90 y 90.';
+        }
+
+        $longitud = $datos['longitud'] ?? '';
+        if ($longitud !== '' && $longitud !== null && (!is_numeric($longitud) || (float) $longitud < -180 || (float) $longitud > 180)) {
+            $errores[] = 'La longitud debe ser un número entre -180 y 180.';
+        }
+
         return $errores;
+    }
+
+    private static function coordenadaOpcional($valor): ?float
+    {
+        return ($valor ?? '') !== '' ? (float) $valor : null;
     }
 }

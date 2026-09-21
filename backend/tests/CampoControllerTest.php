@@ -15,6 +15,37 @@ final class CampoControllerTest extends DatabaseTestCase
         $this->assertSame('Ruta 8 km 200', $campos[0]['ubicacion']);
     }
 
+    public function testCrearGuardaLatitudYLongitud(): void
+    {
+        $tenantId = $this->crearTenant();
+
+        CampoController::crear($tenantId, ['nombre' => 'Campo Norte', 'latitud' => '-32.9800000', 'longitud' => '-61.9500000']);
+
+        $campos = CampoController::listar($tenantId);
+        $this->assertSame(-32.98, (float) $campos[0]['latitud']);
+        $this->assertSame(-61.95, (float) $campos[0]['longitud']);
+    }
+
+    public function testCrearPermiteOmitirLatitudYLongitud(): void
+    {
+        $tenantId = $this->crearTenant();
+
+        $resultado = CampoController::crear($tenantId, ['nombre' => 'Campo Sin Mapa']);
+
+        $this->assertArrayHasKey('id', $resultado);
+        $campos = CampoController::listar($tenantId);
+        $this->assertNull($campos[0]['latitud']);
+    }
+
+    public function testCrearRechazaLatitudFueraDeRango(): void
+    {
+        $tenantId = $this->crearTenant();
+
+        $resultado = CampoController::crear($tenantId, ['nombre' => 'Campo Inválido', 'latitud' => '200', 'longitud' => '-61']);
+
+        $this->assertArrayHasKey('errores', $resultado);
+    }
+
     public function testEditarRechazaCampoDeOtroTenant(): void
     {
         $tenantA = $this->crearTenant('Tenant A');

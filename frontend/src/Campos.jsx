@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
 import { apiFetch } from './api'
+import MapaCampo from './MapaCampo'
 
-const CAMPO_VACIO = { nombre: '', ubicacion: '' }
+const CAMPO_VACIO = { nombre: '', ubicacion: '', latitud: '', longitud: '' }
 
 function Campos() {
   const [campos, setCampos] = useState([])
   const [nuevoCampo, setNuevoCampo] = useState(CAMPO_VACIO)
+  const [mapaKey, setMapaKey] = useState(0)
   const [errores, setErrores] = useState([])
   const [error, setError] = useState(null)
   const [editandoId, setEditandoId] = useState(null)
@@ -36,14 +38,28 @@ function Campos() {
         setErrores(res.error.detalles ?? [res.error.mensaje])
       } else {
         setNuevoCampo(CAMPO_VACIO)
+        setMapaKey((k) => k + 1)
         cargarCampos()
       }
     })
   }
 
+  const alFijarUbicacion = ({ lat, lng }) => {
+    setNuevoCampo((actual) => ({ ...actual, latitud: String(lat), longitud: String(lng) }))
+  }
+
+  const alFijarUbicacionEdicion = ({ lat, lng }) => {
+    setCampoEnEdicion((actual) => ({ ...actual, latitud: String(lat), longitud: String(lng) }))
+  }
+
   const empezarEdicion = (campo) => {
     setEditandoId(campo.id)
-    setCampoEnEdicion({ nombre: campo.nombre, ubicacion: campo.ubicacion ?? '' })
+    setCampoEnEdicion({
+      nombre: campo.nombre,
+      ubicacion: campo.ubicacion ?? '',
+      latitud: campo.latitud ?? '',
+      longitud: campo.longitud ?? '',
+    })
     setErroresEdicion([])
   }
 
@@ -105,6 +121,16 @@ function Campos() {
           </label>
         </div>
 
+        <div>
+          <span className="text-sm text-gray-700">Ubicación en el mapa (opcional)</span>
+          <MapaCampo key={mapaKey} onUbicacionCambiada={alFijarUbicacion} />
+          {nuevoCampo.latitud && (
+            <p className="mt-1 text-xs text-brand-primary">
+              Coordenada marcada: {Number(nuevoCampo.latitud).toFixed(5)}, {Number(nuevoCampo.longitud).toFixed(5)}
+            </p>
+          )}
+        </div>
+
         {errores.length > 0 && (
           <ul className="rounded-md bg-red-50 p-3 text-sm text-red-700">
             {errores.map((err) => (
@@ -140,6 +166,18 @@ function Campos() {
                   placeholder="Ubicación"
                 />
               </div>
+              <div>
+                <MapaCampo
+                  latitud={campoEnEdicion.latitud || null}
+                  longitud={campoEnEdicion.longitud || null}
+                  onUbicacionCambiada={alFijarUbicacionEdicion}
+                />
+                {campoEnEdicion.latitud && (
+                  <p className="mt-1 text-xs text-brand-primary">
+                    Coordenada marcada: {Number(campoEnEdicion.latitud).toFixed(5)}, {Number(campoEnEdicion.longitud).toFixed(5)}
+                  </p>
+                )}
+              </div>
               {erroresEdicion.length > 0 && (
                 <ul className="rounded-md bg-red-50 p-2 text-xs text-red-700">
                   {erroresEdicion.map((err) => (
@@ -165,6 +203,11 @@ function Campos() {
               <div>
                 <div className="text-gray-900">{c.nombre}</div>
                 {c.ubicacion && <div className="text-gray-500">{c.ubicacion}</div>}
+                {c.latitud != null && (
+                  <div className="text-xs text-brand-primary">
+                    · marcado en mapa ({Number(c.latitud).toFixed(4)}, {Number(c.longitud).toFixed(4)})
+                  </div>
+                )}
               </div>
               <div className="flex gap-3 text-xs">
                 <button type="button" onClick={() => empezarEdicion(c)} className="text-brand-primary underline">

@@ -63,6 +63,8 @@ CREATE TABLE campos (
     tenant_id INT NOT NULL,
     nombre VARCHAR(150) NOT NULL,
     ubicacion VARCHAR(255) NULL,
+    latitud DECIMAL(10, 7) NULL COMMENT 'Coordenada fijada arrastrando un marcador en el mapa',
+    longitud DECIMAL(10, 7) NULL,
     estado ENUM('activo', 'inactivo') NOT NULL DEFAULT 'activo',
     creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (tenant_id) REFERENCES tenants(id),
