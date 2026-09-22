@@ -38,7 +38,7 @@ class MovimientoInsumoController
         return $stmt->fetchAll();
     }
 
-    public static function registrar(int $tenantId, array $datos): array
+    public static function registrar(int $tenantId, int $usuarioId, array $datos): array
     {
         $errores = self::validar($tenantId, $datos);
         if (!empty($errores)) {
@@ -68,8 +68,6 @@ class MovimientoInsumoController
                     return ['errores' => ['El movimiento dejaría el stock del insumo en negativo.']];
                 }
             }
-
-            $usuarioId = self::resolverUsuarioPlaceholder($pdo, $tenantId);
 
             $stmt = $pdo->prepare(
                 'INSERT INTO movimientos_insumo
@@ -113,23 +111,6 @@ class MovimientoInsumoController
         $stmt->execute(['tenant_id' => $tenantId, 'insumo_id' => $insumoId]);
 
         return (float) $stmt->fetchColumn();
-    }
-
-    // Hasta que exista login real (ver docs/DECISIONES.md, "Usuario placeholder
-    // por tenant"), todo movimiento se atribuye al primer usuario activo del tenant.
-    private static function resolverUsuarioPlaceholder(PDO $pdo, int $tenantId): int
-    {
-        $stmt = $pdo->prepare(
-            "SELECT id FROM usuarios WHERE tenant_id = :tenant_id AND estado = 'activo' ORDER BY id LIMIT 1"
-        );
-        $stmt->execute(['tenant_id' => $tenantId]);
-        $usuarioId = $stmt->fetchColumn();
-
-        if ($usuarioId === false) {
-            throw new DomainException('El tenant no tiene ningún usuario activo para atribuir el movimiento.');
-        }
-
-        return (int) $usuarioId;
     }
 
     private static function validar(int $tenantId, array $datos): array

@@ -5,10 +5,10 @@ final class MovimientoInsumoControllerTest extends DatabaseTestCase
     public function testEntradaSumaAlStock(): void
     {
         $tenantId = $this->crearTenant();
-        $this->crearUsuario($tenantId);
+        $usuarioId = $this->crearUsuario($tenantId);
         $insumoId = $this->crearInsumo($tenantId);
 
-        $resultado = MovimientoInsumoController::registrar($tenantId, [
+        $resultado = MovimientoInsumoController::registrar($tenantId, $usuarioId, [
             'tipo' => 'ENTRADA',
             'insumo_id' => $insumoId,
             'cantidad_total' => 100,
@@ -22,25 +22,25 @@ final class MovimientoInsumoControllerTest extends DatabaseTestCase
     public function testEgresoLoteExigeLoteYRestaDelStock(): void
     {
         $tenantId = $this->crearTenant();
-        $this->crearUsuario($tenantId);
+        $usuarioId = $this->crearUsuario($tenantId);
         $insumoId = $this->crearInsumo($tenantId);
         $campoId = $this->crearCampo($tenantId);
         $loteId = $this->crearLote($tenantId, $campoId, 20.0);
 
-        MovimientoInsumoController::registrar($tenantId, [
+        MovimientoInsumoController::registrar($tenantId, $usuarioId, [
             'tipo' => 'ENTRADA',
             'insumo_id' => $insumoId,
             'cantidad_total' => 100,
         ]);
 
-        $sinLote = MovimientoInsumoController::registrar($tenantId, [
+        $sinLote = MovimientoInsumoController::registrar($tenantId, $usuarioId, [
             'tipo' => 'EGRESO_LOTE',
             'insumo_id' => $insumoId,
             'cantidad_total' => 40,
         ]);
         $this->assertArrayHasKey('errores', $sinLote);
 
-        $resultado = MovimientoInsumoController::registrar($tenantId, [
+        $resultado = MovimientoInsumoController::registrar($tenantId, $usuarioId, [
             'tipo' => 'EGRESO_LOTE',
             'insumo_id' => $insumoId,
             'lote_id' => $loteId,
@@ -56,18 +56,18 @@ final class MovimientoInsumoControllerTest extends DatabaseTestCase
     public function testEgresoLoteSeRechazaSiDejaStockNegativo(): void
     {
         $tenantId = $this->crearTenant();
-        $this->crearUsuario($tenantId);
+        $usuarioId = $this->crearUsuario($tenantId);
         $insumoId = $this->crearInsumo($tenantId);
         $campoId = $this->crearCampo($tenantId);
         $loteId = $this->crearLote($tenantId, $campoId);
 
-        MovimientoInsumoController::registrar($tenantId, [
+        MovimientoInsumoController::registrar($tenantId, $usuarioId, [
             'tipo' => 'ENTRADA',
             'insumo_id' => $insumoId,
             'cantidad_total' => 10,
         ]);
 
-        $resultado = MovimientoInsumoController::registrar($tenantId, [
+        $resultado = MovimientoInsumoController::registrar($tenantId, $usuarioId, [
             'tipo' => 'EGRESO_LOTE',
             'insumo_id' => $insumoId,
             'lote_id' => $loteId,
@@ -82,16 +82,16 @@ final class MovimientoInsumoControllerTest extends DatabaseTestCase
     public function testAjusteConSignoSumaYResta(): void
     {
         $tenantId = $this->crearTenant();
-        $this->crearUsuario($tenantId);
+        $usuarioId = $this->crearUsuario($tenantId);
         $insumoId = $this->crearInsumo($tenantId);
 
-        MovimientoInsumoController::registrar($tenantId, [
+        MovimientoInsumoController::registrar($tenantId, $usuarioId, [
             'tipo' => 'ENTRADA',
             'insumo_id' => $insumoId,
             'cantidad_total' => 50,
         ]);
 
-        MovimientoInsumoController::registrar($tenantId, [
+        MovimientoInsumoController::registrar($tenantId, $usuarioId, [
             'tipo' => 'AJUSTE',
             'insumo_id' => $insumoId,
             'cantidad_total' => 5,
@@ -99,7 +99,7 @@ final class MovimientoInsumoControllerTest extends DatabaseTestCase
         $stockTrasAjustePositivo = InsumoController::stock($tenantId)[0]['stock_actual'];
         $this->assertSame(55.0, (float) $stockTrasAjustePositivo);
 
-        MovimientoInsumoController::registrar($tenantId, [
+        MovimientoInsumoController::registrar($tenantId, $usuarioId, [
             'tipo' => 'AJUSTE',
             'insumo_id' => $insumoId,
             'cantidad_total' => -20,
@@ -111,16 +111,16 @@ final class MovimientoInsumoControllerTest extends DatabaseTestCase
     public function testAjusteNoPuedeDejarStockNegativo(): void
     {
         $tenantId = $this->crearTenant();
-        $this->crearUsuario($tenantId);
+        $usuarioId = $this->crearUsuario($tenantId);
         $insumoId = $this->crearInsumo($tenantId);
 
-        MovimientoInsumoController::registrar($tenantId, [
+        MovimientoInsumoController::registrar($tenantId, $usuarioId, [
             'tipo' => 'ENTRADA',
             'insumo_id' => $insumoId,
             'cantidad_total' => 10,
         ]);
 
-        $resultado = MovimientoInsumoController::registrar($tenantId, [
+        $resultado = MovimientoInsumoController::registrar($tenantId, $usuarioId, [
             'tipo' => 'AJUSTE',
             'insumo_id' => $insumoId,
             'cantidad_total' => -30,
@@ -132,14 +132,14 @@ final class MovimientoInsumoControllerTest extends DatabaseTestCase
     public function testMovimientosEstanAisladosPorTenant(): void
     {
         $tenantA = $this->crearTenant('Tenant A');
-        $this->crearUsuario($tenantA, 'a@example.com');
+        $usuarioA = $this->crearUsuario($tenantA, 'a@example.com');
         $insumoA = $this->crearInsumo($tenantA, 'Glifosato');
 
         $tenantB = $this->crearTenant('Tenant B');
         $this->crearUsuario($tenantB, 'b@example.com');
         $insumoB = $this->crearInsumo($tenantB, 'Glifosato');
 
-        MovimientoInsumoController::registrar($tenantA, [
+        MovimientoInsumoController::registrar($tenantA, $usuarioA, [
             'tipo' => 'ENTRADA',
             'insumo_id' => $insumoA,
             'cantidad_total' => 100,
@@ -159,9 +159,9 @@ final class MovimientoInsumoControllerTest extends DatabaseTestCase
         $insumoA = $this->crearInsumo($tenantA);
 
         $tenantB = $this->crearTenant('Tenant B');
-        $this->crearUsuario($tenantB, 'b@example.com');
+        $usuarioB = $this->crearUsuario($tenantB, 'b@example.com');
 
-        $resultado = MovimientoInsumoController::registrar($tenantB, [
+        $resultado = MovimientoInsumoController::registrar($tenantB, $usuarioB, [
             'tipo' => 'ENTRADA',
             'insumo_id' => $insumoA,
             'cantidad_total' => 10,
@@ -173,10 +173,10 @@ final class MovimientoInsumoControllerTest extends DatabaseTestCase
     public function testEntradaRechazaCantidadNoPositiva(): void
     {
         $tenantId = $this->crearTenant();
-        $this->crearUsuario($tenantId);
+        $usuarioId = $this->crearUsuario($tenantId);
         $insumoId = $this->crearInsumo($tenantId);
 
-        $resultado = MovimientoInsumoController::registrar($tenantId, [
+        $resultado = MovimientoInsumoController::registrar($tenantId, $usuarioId, [
             'tipo' => 'ENTRADA',
             'insumo_id' => $insumoId,
             'cantidad_total' => 0,

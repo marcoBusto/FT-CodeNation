@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { guardarTenantId, obtenerTenantId } from './api'
+import { apiFetch, cerrarSesion, guardarSesion, obtenerToken, obtenerUsuario } from './api'
 import Campos from './Campos'
 import Lotes from './Lotes'
 import Insumos from './Insumos'
@@ -9,11 +9,16 @@ import Reportes from './Reportes'
 import SimuladorCompras from './SimuladorCompras'
 
 function App() {
-  const [tenantId, setTenantId] = useState(obtenerTenantId())
+  const [usuario, setUsuario] = useState(obtenerUsuario())
   const [vista, setVista] = useState('insumos')
 
-  if (!tenantId) {
-    return <SeleccionarTenant onIngresar={setTenantId} />
+  if (!obtenerToken() || !usuario) {
+    return <Login onIngresar={setUsuario} />
+  }
+
+  const salir = () => {
+    cerrarSesion()
+    setUsuario(null)
   }
 
   return (
@@ -21,15 +26,12 @@ function App() {
       <header>
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-semibold text-brand-primary-dark">Stock e Insumos Agrícolas</h1>
-          <button
-            onClick={() => {
-              guardarTenantId('')
-              setTenantId('')
-            }}
-            className="text-xs text-gray-400 hover:text-gray-600"
-          >
-            Cambiar tenant (#{tenantId})
-          </button>
+          <div className="flex items-center gap-3 text-xs text-gray-500">
+            <span>{usuario.nombre}</span>
+            <button onClick={salir} className="text-gray-400 underline hover:text-gray-600">
+              Cerrar sesión
+            </button>
+          </div>
         </div>
         <nav className="mt-4 flex flex-wrap gap-2 border-b border-gray-200">
           <Pestaña activa={vista === 'campos'} onClick={() => setVista('campos')}>
@@ -89,38 +91,62 @@ function Pestaña({ activa, onClick, children }) {
   )
 }
 
-// Todavía no existe login (ver docs/DECISIONES.md, "Resolución de tenant"):
-// esta pantalla es el reemplazo temporal para indicar con qué tenant trabajar.
-function SeleccionarTenant({ onIngresar }) {
-  const [valor, setValor] = useState('')
+function Login({ onIngresar }) {
+  const [email, setEmail] = useState('')
+  const [contrasena, setContrasena] = useState('')
+  const [error, setError] = useState(null)
+  const [cargando, setCargando] = useState(false)
 
   const ingresar = (evento) => {
     evento.preventDefault()
-    if (!valor) return
-    guardarTenantId(valor)
-    onIngresar(valor)
+    setError(null)
+    setCargando(true)
+
+    apiFetch('/login', { method: 'POST', body: JSON.stringify({ email, contrasena }) }).then((res) => {
+      setCargando(false)
+      if (res.error) {
+        setError(res.error.detalles?.[0] ?? res.error.mensaje)
+      } else {
+        guardarSesion(res.data.token, res.data.usuario)
+        onIngresar(res.data.usuario)
+      }
+    })
   }
 
   return (
     <div className="mx-auto max-w-sm p-8">
       <h1 className="text-xl font-semibold text-brand-primary-dark">Stock e Insumos Agrícolas</h1>
-      <p className="mt-2 text-sm text-gray-500">
-        Todavía no hay login: indicá el ID del tenant con el que querés trabajar.
-      </p>
-      <form onSubmit={ingresar} className="mt-4 flex gap-2">
-        <input
-          type="number"
-          min="1"
-          placeholder="ID de tenant"
-          value={valor}
-          onChange={(e) => setValor(e.target.value)}
-          className="campo"
-        />
+      <form onSubmit={ingresar} className="mt-4 space-y-3">
+        <label className="block">
+          <span className="text-sm text-gray-700">Email</span>
+          <input
+            type="email"
+            required
+            autoFocus
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="campo mt-1"
+          />
+        </label>
+        <label className="block">
+          <span className="text-sm text-gray-700">Contraseña</span>
+          <input
+            type="password"
+            required
+            value={contrasena}
+            onChange={(e) => setContrasena(e.target.value)}
+            className="campo mt-1"
+          />
+        </label>
+
+        {error && <p className="rounded-md bg-red-50 p-2 text-sm text-red-700">{error}</p>}
+
         <button
           type="submit"
-          className="rounded-md bg-brand-primary px-4 py-2 text-sm font-medium text-white hover:bg-brand-primary-dark"
+          disabled={cargando}
+          className="w-full rounded-md bg-brand-primary px-4 py-2 text-sm font-medium text-white hover:bg-brand-primary-dark disabled:opacity-50"
         >
-          Ingresar
+          {cargando ? 'Ingresando...' : 'Ingresar'}
         </button>
       </form>
     </div>

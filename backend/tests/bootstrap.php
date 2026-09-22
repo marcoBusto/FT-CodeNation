@@ -11,3 +11,4 @@ putenv('DB_PORT=3307');
 putenv('DB_DATABASE=stock_agricola_test');
 putenv('DB_USERNAME=root');
 putenv('DB_PASSWORD=');
+putenv('JWT_SECRET=secreto-de-test-no-usar-en-produccion');

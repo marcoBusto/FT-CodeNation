@@ -121,3 +121,17 @@ Registro de decisiones importantes del proyecto y su justificación, para no per
 **Corte de conexión SSH directa:** durante el deploy, la conexión SSH directa desde la máquina de desarrollo (vía `scp`/`ssh` con la clave `.pem`) se cortó a mitad de una operación y no se pudo restablecer en el resto de la sesión (timeout total, sin que fuera `fail2ban` — no está instalado — ni el firewall de Lightsail, que permite SSH desde cualquier IP). Se terminó el deploy relevando comandos a través de la terminal del navegador de Lightsail. Puede ser el mismo tipo de fricción de red/antivirus ya documentado en esta máquina (ver la nota de Avast más arriba) — si se repite, no asumir que el servidor está caído, probar por la terminal del navegador antes de alarmarse.
 
 ---
+
+## 2026-09-22 — Login real: JWT en header custom `X-Auth-Token`, reemplaza `X-Tenant-Id`
+
+**Decisión:** se agregó `POST /login` (email + contraseña, valida contra `usuarios.password_hash` que ya existía en el esquema) que devuelve un token firmado (JWT, `firebase/php-jwt`). Todas las demás rutas ahora exigen ese token en el header `X-Auth-Token` — reemplaza al header manual `X-Tenant-Id` que el usuario tenía que tipear a mano. El backend saca `tenant_id` **y** `usuario_id` del token, así que los movimientos de stock ya no se atribuyen al "primer usuario del tenant" (placeholder eliminado junto con `src/Tenant.php`) sino al usuario que efectivamente inició sesión. Sesión válida por 7 días. `src/Auth.php` reemplaza a `src/Tenant.php` tal como estaba previsto en la entrada de "Resolución de tenant" de más arriba.
+
+**Motivo:** pedido del usuario (2026-09-22, antes del lunes) — reemplazar el ingreso por ID de tenant por un login real, sin que la interfaz mencione la palabra "tenant" (el usuario final no sabe qué es).
+
+**Por qué un header custom y no `Authorization: Bearer` estándar:** algunas configuraciones de Apache (y ya tuvimos sorpresas con este hosting, ver las entradas de arriba) no dejan pasar el header `Authorization` a PHP salvo configuración adicional. Un header propio evita ese riesgo y sigue el mismo patrón que ya funcionaba con `X-Tenant-Id`.
+
+**Fuera de esta primera versión, a propósito:** recuperar contraseña por email (necesitaría infraestructura de envío de mails que no existe) y una pantalla para dar de alta usuarios nuevos (se siguen creando a mano en la base, igual que los tenants). El primer usuario real (`msbusto@gmail.com`, tenant "Agro Demo") se cargó a mano reemplazando el usuario placeholder "Admin Demo".
+
+**Cómo aplicar en el próximo deploy:** el servidor de producción necesita la variable `JWT_SECRET` en `backend/.env` (generar con `openssl rand -hex 32`, nunca reusar la de desarrollo) antes de que el login funcione ahí.
+
+---

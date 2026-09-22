@@ -9,7 +9,8 @@ error_reporting(E_ALL);
 
 require __DIR__ . '/../vendor/autoload.php';
 require __DIR__ . '/../config/Database.php';
-require __DIR__ . '/../src/Tenant.php';
+require __DIR__ . '/../src/Auth.php';
+require __DIR__ . '/../src/Controllers/AuthController.php';
 require __DIR__ . '/../src/Controllers/CampoController.php';
 require __DIR__ . '/../src/Controllers/LoteController.php';
 require __DIR__ . '/../src/Controllers/InsumoController.php';
@@ -38,7 +39,7 @@ $origenPermitido = in_array($origenSolicitado, $origenesPermitidos, true) ? $ori
 header("Access-Control-Allow-Origin: {$origenPermitido}");
 header('Vary: Origin');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, X-Tenant-Id');
+header('Access-Control-Allow-Headers: Content-Type, X-Auth-Token');
 header('Content-Type: application/json; charset=utf-8');
 
 $metodo = $_SERVER['REQUEST_METHOD'];
@@ -103,10 +104,22 @@ try {
         return;
     }
 
-    // Toda ruta de acá en adelante pertenece al módulo de Stock e Insumos y
-    // exige un tenant válido (ver src/Tenant.php: solución temporal hasta
-    // que exista login real).
-    $tenantId = Tenant::resolverDesdeHeader($_SERVER['HTTP_X_TENANT_ID'] ?? null);
+    if ($ruta === '/login' && $metodo === 'POST') {
+        responderResultado(AuthController::login($cuerpo()));
+        return;
+    }
+
+    // Toda ruta de acá en adelante exige una sesión válida (ver src/Auth.php).
+    // El token viaja en X-Auth-Token en vez del header manual X-Tenant-Id que
+    // usaba este proyecto antes de tener login real.
+    try {
+        $sesion = Auth::resolverDesdeToken($_SERVER['HTTP_X_AUTH_TOKEN'] ?? null);
+    } catch (DomainException $e) {
+        responderError($e->getMessage(), 401);
+        return;
+    }
+    $tenantId = $sesion['tenant_id'];
+    $usuarioId = $sesion['usuario_id'];
 
     if ($ruta === '/campos' && $metodo === 'GET') {
         responder(CampoController::listar($tenantId));
@@ -224,7 +237,7 @@ try {
     }
 
     if ($ruta === '/movimientos' && $metodo === 'POST') {
-        responderResultado(MovimientoInsumoController::registrar($tenantId, $cuerpo()), 201);
+        responderResultado(MovimientoInsumoController::registrar($tenantId, $usuarioId, $cuerpo()), 201);
         return;
     }
 
