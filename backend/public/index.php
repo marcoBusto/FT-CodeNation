@@ -20,6 +20,7 @@ require __DIR__ . '/../src/Controllers/LaborController.php';
 require __DIR__ . '/../src/Controllers/EstacionCombustibleController.php';
 require __DIR__ . '/../src/Controllers/CombustibleController.php';
 require __DIR__ . '/../src/Controllers/ReporteController.php';
+require __DIR__ . '/../src/Controllers/SimuladorComprasController.php';
 
 // Carga el .env desde el arranque (no recién en la primera conexión a la
 // base) porque el header CORS de acá abajo lo necesita ya mismo.
@@ -283,6 +284,16 @@ try {
         header('Content-Type: application/pdf');
         header('Content-Disposition: inline; filename="insumos-stock.pdf"');
         echo ReporteController::pdfInsumosStock($tenantId);
+        return;
+    }
+
+    if ($ruta === '/simulador-compras/cotizacion-dolar' && $metodo === 'GET') {
+        responderResultado(SimuladorComprasController::cotizacionDolar());
+        return;
+    }
+
+    if ($ruta === '/simulador-compras/estimar' && $metodo === 'POST') {
+        responderResultado(SimuladorComprasController::estimar($tenantId, $cuerpo()));
         return;
     }
 

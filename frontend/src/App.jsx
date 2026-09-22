@@ -6,6 +6,7 @@ import Insumos from './Insumos'
 import Movimientos from './Movimientos'
 import Combustible from './Combustible'
 import Reportes from './Reportes'
+import SimuladorCompras from './SimuladorCompras'
 
 function App() {
   const [tenantId, setTenantId] = useState(obtenerTenantId())
@@ -49,6 +50,9 @@ function App() {
           <Pestaña activa={vista === 'reportes'} onClick={() => setVista('reportes')}>
             Reportes
           </Pestaña>
+          <Pestaña activa={vista === 'simulador'} onClick={() => setVista('simulador')}>
+            Simulador de compras
+          </Pestaña>
         </nav>
       </header>
 
@@ -59,6 +63,7 @@ function App() {
         {vista === 'movimientos' && <Movimientos />}
         {vista === 'combustible' && <Combustible />}
         {vista === 'reportes' && <Reportes />}
+        {vista === 'simulador' && <SimuladorCompras />}
       </main>
 
       <footer className="mt-12 flex items-center gap-2 border-t border-gray-200 pt-4 text-xs text-gray-400">
