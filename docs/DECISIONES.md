@@ -109,3 +109,15 @@ Registro de decisiones importantes del proyecto y su justificación, para no per
 **Motivo:** pedido del usuario en auditoría (2026-09-21). Se descartó integrar la WhatsApp Business API (envío 100% automático) porque requiere una cuenta business con costo por mensaje y aprobación — desproporcionado para el pedido ("enviar por WhatsApp o imprimir o descargar"). El usuario eligió la opción sin costo, aceptando que en navegadores de escritorio el adjunto del PDF sea manual.
 
 ---
+
+## 2026-09-22 — Deploy a producción: sin `git` en el servidor, `apt` descartado por riesgo con MariaDB de Bitnami
+
+**Hito/problema resuelto:** al deployar el backend (ubicación, combustible, reportes), el servidor de Lightsail (`WordPress_Multisite-CodeNation`) no tenía `git` instalado. `sudo apt-get install git` falló por dependencias rotas que además querían instalar `mariadb-server` desde el repositorio de Debian — **se abortó ese camino a propósito**: esa instancia corre la MariaDB propia de Bitnami (fuera de `apt`, en `/opt/bitnami/mariadb`) sirviendo varios sitios de clientes (no solo `stock.codenation.com.ar`); una segunda instalación de MariaDB por `apt` podía chocar con la que ya está corriendo.
+
+**Cómo se resolvió:** se copiaron los archivos de código (`src/`, `public/`, `config/`, `composer.json`, `composer.lock` — sin `vendor/` ni `.env`) por `scp` directo desde la máquina de desarrollo, con backup previo del código anterior en `/home/bitnami/backups/`. Para las dependencias (`dompdf`), se instaló Composer con el instalador oficial vía `curl`/`php` (no toca `apt` ni el sistema), y se corrió `composer install --no-dev` directo en el servidor.
+
+**Nota operativa para el próximo deploy:** no asumir que `git`/`composer` están disponibles en este servidor. El método de arriba (scp + composer vía curl) es el que funciona sin tocar paquetes del sistema. Además, la terminal SSH embebida de Lightsail (la del navegador) no ejecuta bien comandos pegados en **varias líneas** a la vez — conviene armar todo en un solo renglón con `;` entre comandos.
+
+**Corte de conexión SSH directa:** durante el deploy, la conexión SSH directa desde la máquina de desarrollo (vía `scp`/`ssh` con la clave `.pem`) se cortó a mitad de una operación y no se pudo restablecer en el resto de la sesión (timeout total, sin que fuera `fail2ban` — no está instalado — ni el firewall de Lightsail, que permite SSH desde cualquier IP). Se terminó el deploy relevando comandos a través de la terminal del navegador de Lightsail. Puede ser el mismo tipo de fricción de red/antivirus ya documentado en esta máquina (ver la nota de Avast más arriba) — si se repite, no asumir que el servidor está caído, probar por la terminal del navegador antes de alarmarse.
+
+---
