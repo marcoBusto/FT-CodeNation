@@ -314,5 +314,9 @@ try {
 } catch (DomainException $e) {
     responderError($e->getMessage(), 400);
 } catch (Throwable $e) {
+    // Antes esto no se logueaba (a pesar de lo que dice el comentario de
+    // arriba): el catch se comía la excepción sin dejar rastro en ningún
+    // lado, haciendo imposible diagnosticar errores 500 en producción.
+    error_log('[500] ' . $e->getMessage() . ' en ' . $e->getFile() . ':' . $e->getLine());
     responderError('Error interno del servidor', 500);
 }
