@@ -135,3 +135,27 @@ Registro de decisiones importantes del proyecto y su justificación, para no per
 **Cómo aplicar en el próximo deploy:** el servidor de producción necesita la variable `JWT_SECRET` en `backend/.env` (generar con `openssl rand -hex 32`, nunca reusar la de desarrollo) antes de que el login funcione ahí.
 
 ---
+
+## 2026-09-25 — Agente de IA en la web: diseño para la próxima actualización (NO construido todavía)
+
+**Pedido del usuario:** en la auditoría de UX del 2026-09-25, se pidió sumar un agente de IA a la web. Al preguntar el alcance, Marco lo definió abierto: responder preguntas sobre los datos cargados, ayudar a cargar movimientos por chat, y servir de soporte/ayuda general del sistema — con lugar para crecer más adelante. Es la primera vez que Marco diseña un sistema con IA integrada, así que este registro es más explicativo de lo habitual.
+
+**Qué significa "agente de IA" acá, en criollo:** un cuadro de chat en la web donde el usuario escribe en lenguaje natural (ej. "¿cuánto glifosato me queda?" o "cargá 100 litros de glifosato al lote 3") y un modelo de lenguaje (tipo el que arma este mismo documento) interpreta el pedido, consulta o modifica los datos del sistema, y responde en español.
+
+**Decisión de alcance para la v1 (recomendada, pendiente de confirmar antes de construir):**
+- **v1 = solo lectura.** El agente puede responder preguntas sobre stock, campos, lotes, movimientos — nunca escribe nada en la base todavía.
+- **v2 (después, no en esta primera etapa) = escritura con confirmación.** Cargar movimientos por chat, pero mostrando siempre "esto es lo que voy a registrar, ¿confirmás?" antes de guardar — nunca que el agente actúe solo sin que el usuario vea y apruebe el movimiento exacto.
+
+**Por qué separar en dos etapas:**
+1. **Costo real y recurrente:** a diferencia del resto del sistema (que corre en un servidor ya pago), cada mensaje al agente de IA tiene un costo de uso (se paga por la cantidad de texto que procesa el modelo). Antes de dejarlo escribir datos libremente, conviene medir cuánto se usa y cuánto cuesta en la práctica con la versión de solo consulta.
+2. **Seguridad de los datos:** los movimientos de stock son un ledger inmutable (ver la entrada de arriba sobre "Stock negativo") — una vez cargado un movimiento no se borra, solo se corrige con un ajuste nuevo. Un agente que escribe mal un dato por malinterpretar un mensaje es más riesgoso que un formulario, porque el usuario no eligió cada campo a mano. La confirmación explícita antes de guardar es la manera de mitigar esto sin perder la comodidad del chat.
+
+**Forma técnica prevista (para cuando se construya):**
+- **Proveedor:** API de Claude (Anthropic) — mismo motor que ya se usa para desarrollar este sistema con Claude Code, evita sumar un proveedor nuevo a evaluar.
+- **Backend:** un endpoint nuevo (ej. `POST /agente/consulta`) que recibe el mensaje del usuario, se lo pasa a la API de Claude junto con "herramientas" (tool calling) conectadas a los controllers que ya existen — para v1, solo las de lectura: `CampoController::listar`, `LoteController::listar`, `InsumoController::stock`, `MovimientoInsumoController::listar`. El modelo decide qué herramienta llamar según la pregunta, y arma la respuesta en español con el resultado.
+- **Frontend:** un componente de chat (cuadro de mensajes + input), nueva pestaña o widget flotante — a definir cuál cuando se construya.
+- **Autenticación:** el endpoint del agente exige el mismo `X-Auth-Token` (JWT) que el resto de la API, así el agente solo ve los datos del tenant del usuario logueado — nunca de otro cliente.
+
+**Fuera de esta primera versión, a propósito:** escritura de datos por chat (v2), y cualquier acción fuera de consultar/cargar información del propio negocio (nada de administrar el sistema, usuarios, ni configuración desde el chat).
+
+**Pendiente antes de construir:** confirmar con Marco el modelo de costos (¿la API de Claude se paga con una cuenta de Marco, y ese costo entra en el abono de mantenimiento técnico que se está definiendo con el cliente?), y decidir dónde vive el chat en la interfaz.
