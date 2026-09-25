@@ -65,12 +65,12 @@ function Calculadora({ labores, estaciones, lotes }) {
   }
 
   return (
-    <form onSubmit={calcular} className="space-y-3 rounded-md border border-gray-200 p-4">
+    <form onSubmit={calcular} className="space-y-3 rounded-md border border-gray-300 p-4">
       <h2 className="text-sm font-medium text-brand-primary-dark">Calculador estimativo de combustible</h2>
-      <p className="text-xs text-gray-400">
+      <p className="text-xs text-gray-600">
         Estimación rápida (litros y costo) en base a las hectáreas del lote — no queda guardada como historial.
       </p>
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <label className="block">
           <span className="text-sm text-gray-700">Lote</span>
           <select required value={loteId} onChange={(e) => setLoteId(e.target.value)} className="campo mt-1">
@@ -133,7 +133,7 @@ function Calculadora({ labores, estaciones, lotes }) {
           <p className="font-medium text-brand-primary-dark">
             {resultado.litros_estimados} litros estimados · ${resultado.costo_estimado}
           </p>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-700">
             {resultado.labor_nombre} en {lote?.nombre} · precio de {resultado.estacion_nombre} actualizado el{' '}
             {new Date(resultado.precio_actualizado_en).toLocaleDateString('es-AR')}
           </p>
@@ -179,7 +179,7 @@ function CatalogoLabores({ labores, onCambio }) {
   }
 
   return (
-    <div className="space-y-3 rounded-md border border-gray-200 p-4">
+    <div className="space-y-3 rounded-md border border-gray-300 p-4">
       <h2 className="text-sm font-medium text-brand-primary-dark">Labores y consumo estimado</h2>
 
       <form onSubmit={crear} className="flex flex-wrap items-end gap-3">
@@ -219,7 +219,7 @@ function CatalogoLabores({ labores, onCambio }) {
         </ul>
       )}
 
-      <ul className="divide-y divide-gray-200 rounded-md border border-gray-200">
+      <ul className="divide-y divide-gray-200 rounded-md border border-gray-300">
         {labores.map((l) =>
           editandoId === l.id ? (
             <li key={l.id} className="flex items-center gap-3 p-3 text-sm">
@@ -240,7 +240,7 @@ function CatalogoLabores({ labores, onCambio }) {
               <button type="button" onClick={() => guardar(l.id)} className="rounded-md bg-brand-primary px-3 py-1 text-xs text-white">
                 Guardar
               </button>
-              <button type="button" onClick={() => setEditandoId(null)} className="text-xs text-gray-500 underline">
+              <button type="button" onClick={() => setEditandoId(null)} className="text-xs text-gray-700 underline">
                 Cancelar
               </button>
             </li>
@@ -248,7 +248,7 @@ function CatalogoLabores({ labores, onCambio }) {
             <li key={l.id} className="flex items-center justify-between p-3 text-sm">
               <span className="text-gray-900">{l.nombre}</span>
               <div className="flex items-center gap-3">
-                <span className="text-gray-500">{l.litros_por_hectarea} l/ha</span>
+                <span className="text-gray-700">{l.litros_por_hectarea} l/ha</span>
                 <button
                   type="button"
                   onClick={() => {
@@ -266,7 +266,7 @@ function CatalogoLabores({ labores, onCambio }) {
             </li>
           )
         )}
-        {labores.length === 0 && <li className="p-3 text-sm text-gray-500">Todavía no hay labores cargadas.</li>}
+        {labores.length === 0 && <li className="p-3 text-sm text-gray-700">Todavía no hay labores cargadas.</li>}
       </ul>
     </div>
   )
@@ -308,9 +308,9 @@ function CatalogoEstaciones({ estaciones, onCambio }) {
   }
 
   return (
-    <div className="space-y-3 rounded-md border border-gray-200 p-4">
+    <div className="space-y-3 rounded-md border border-gray-300 p-4">
       <h2 className="text-sm font-medium text-brand-primary-dark">Estaciones y precio por litro</h2>
-      <p className="text-xs text-gray-400">
+      <p className="text-xs text-gray-600">
         El precio se carga a mano y hay que actualizarlo cuando cambia — no existe una fuente online gratuita y
         confiable por surtidor.
       </p>
@@ -352,7 +352,7 @@ function CatalogoEstaciones({ estaciones, onCambio }) {
         </ul>
       )}
 
-      <ul className="divide-y divide-gray-200 rounded-md border border-gray-200">
+      <ul className="divide-y divide-gray-200 rounded-md border border-gray-300">
         {estaciones.map((e) =>
           editandoId === e.id ? (
             <li key={e.id} className="flex items-center gap-3 p-3 text-sm">
@@ -373,7 +373,7 @@ function CatalogoEstaciones({ estaciones, onCambio }) {
               <button type="button" onClick={() => guardar(e.id)} className="rounded-md bg-brand-primary px-3 py-1 text-xs text-white">
                 Guardar
               </button>
-              <button type="button" onClick={() => setEditandoId(null)} className="text-xs text-gray-500 underline">
+              <button type="button" onClick={() => setEditandoId(null)} className="text-xs text-gray-700 underline">
                 Cancelar
               </button>
             </li>
@@ -381,7 +381,7 @@ function CatalogoEstaciones({ estaciones, onCambio }) {
             <li key={e.id} className="flex items-center justify-between p-3 text-sm">
               <span className="text-gray-900">{e.nombre}</span>
               <div className="flex items-center gap-3">
-                <span className="text-gray-500">
+                <span className="text-gray-700">
                   ${e.precio_por_litro}/l · actualizado {new Date(e.actualizado_en).toLocaleDateString('es-AR')}
                 </span>
                 <button
@@ -401,7 +401,7 @@ function CatalogoEstaciones({ estaciones, onCambio }) {
             </li>
           )
         )}
-        {estaciones.length === 0 && <li className="p-3 text-sm text-gray-500">Todavía no hay estaciones cargadas.</li>}
+        {estaciones.length === 0 && <li className="p-3 text-sm text-gray-700">Todavía no hay estaciones cargadas.</li>}
       </ul>
     </div>
   )

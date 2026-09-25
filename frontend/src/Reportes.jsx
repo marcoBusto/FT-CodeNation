@@ -44,8 +44,8 @@ function ReporteCamposLotes({ campos, lotesPorCampo }) {
   })
 
   return (
-    <div className="space-y-3 rounded-md border border-gray-200 p-4">
-      <div className="flex items-center justify-between">
+    <div className="space-y-3 rounded-md border border-gray-300 p-4">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-sm font-medium text-brand-primary-dark">{titulo}</h2>
         <AccionesReporte
           rutaPdf="/reportes/campos-lotes"
@@ -54,27 +54,27 @@ function ReporteCamposLotes({ campos, lotesPorCampo }) {
         />
       </div>
 
-      {filas.length === 0 && <p className="text-sm text-gray-500">Todavía no hay campos cargados.</p>}
+      {filas.length === 0 && <p className="text-sm text-gray-700">Todavía no hay campos cargados.</p>}
 
       {filas.map(({ campo, lotes: lotesDelCampo, totalHectareas }) => (
-        <div key={campo.id} className="rounded-md border border-gray-100 p-3">
+        <div key={campo.id} className="rounded-md border border-gray-200 p-3">
           <p className="text-sm font-medium text-gray-900">{campo.nombre}</p>
-          {campo.ubicacion && <p className="text-xs text-gray-500">{campo.ubicacion}</p>}
+          {campo.ubicacion && <p className="text-xs text-gray-700">{campo.ubicacion}</p>}
           {lotesDelCampo.length === 0 ? (
-            <p className="mt-2 text-xs text-gray-400">Sin lotes cargados.</p>
+            <p className="mt-2 text-xs text-gray-600">Sin lotes cargados.</p>
           ) : (
             <table className="mt-2 w-full text-xs">
               <thead>
-                <tr className="text-left text-gray-500">
-                  <th className="py-1">Lote</th>
-                  <th className="py-1">Hectáreas</th>
+                <tr className="text-left text-gray-700">
+                  <th className="py-1 px-2">Lote</th>
+                  <th className="py-1 px-2">Hectáreas</th>
                 </tr>
               </thead>
               <tbody>
                 {lotesDelCampo.map((l) => (
-                  <tr key={l.id} className="border-t border-gray-100">
-                    <td className="py-1 text-gray-900">{l.nombre}</td>
-                    <td className="py-1 text-gray-500">{l.hectareas} ha</td>
+                  <tr key={l.id} className="border-t border-gray-200">
+                    <td className="py-1 px-2 text-gray-900">{l.nombre}</td>
+                    <td className="py-1 px-2 text-gray-700">{l.hectareas} ha</td>
                   </tr>
                 ))}
               </tbody>
@@ -93,8 +93,8 @@ function ReporteInsumosStock({ stock }) {
   const titulo = 'Reporte de insumos y stock'
 
   return (
-    <div className="space-y-3 rounded-md border border-gray-200 p-4">
-      <div className="flex items-center justify-between">
+    <div className="space-y-3 rounded-md border border-gray-300 p-4">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-sm font-medium text-brand-primary-dark">{titulo}</h2>
         <AccionesReporte
           rutaPdf="/reportes/insumos-stock"
@@ -104,30 +104,32 @@ function ReporteInsumosStock({ stock }) {
       </div>
 
       {stock.length === 0 ? (
-        <p className="text-sm text-gray-500">Todavía no hay insumos cargados.</p>
+        <p className="text-sm text-gray-700">Todavía no hay insumos cargados.</p>
       ) : (
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="text-left text-gray-500">
-              <th className="py-1">Insumo</th>
-              <th className="py-1">Marca</th>
-              <th className="py-1">Categoría</th>
-              <th className="py-1">Stock</th>
-            </tr>
-          </thead>
-          <tbody>
-            {stock.map((i) => (
-              <tr key={i.id} className="border-t border-gray-100">
-                <td className="py-1 text-gray-900">{i.nombre}</td>
-                <td className="py-1 text-gray-500">{i.marca_nombre ?? '-'}</td>
-                <td className="py-1 text-gray-500">{i.categoria_nombre ?? '-'}</td>
-                <td className={`py-1 ${Number(i.stock_actual) <= 0 ? 'font-medium text-red-600' : 'text-gray-500'}`}>
-                  {i.stock_actual} {i.unidad_medida}
-                </td>
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-max text-sm">
+            <thead>
+              <tr className="text-left text-gray-700">
+                <th className="py-1 px-2">Insumo</th>
+                <th className="py-1 px-2">Marca</th>
+                <th className="py-1 px-2">Categoría</th>
+                <th className="py-1 px-2">Stock</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {stock.map((i) => (
+                <tr key={i.id} className="border-t border-gray-200">
+                  <td className="py-1 px-2 text-gray-900">{i.nombre}</td>
+                  <td className="py-1 px-2 text-gray-700">{i.marca_nombre ?? '-'}</td>
+                  <td className="py-1 px-2 text-gray-700">{i.categoria_nombre ?? '-'}</td>
+                  <td className={`py-1 px-2 ${Number(i.stock_actual) <= 0 ? 'font-medium text-red-600' : 'text-gray-700'}`}>
+                    {i.stock_actual} {i.unidad_medida}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   )

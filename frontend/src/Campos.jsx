@@ -97,7 +97,7 @@ function Campos() {
         </p>
       )}
 
-      <form onSubmit={crearCampo} className="space-y-3 rounded-md border border-gray-200 p-4">
+      <form onSubmit={crearCampo} className="space-y-3 rounded-md border border-gray-300 p-4">
         <h2 className="text-sm font-medium text-brand-primary-dark">Nuevo campo</h2>
         <div className="grid grid-cols-2 gap-3">
           <label className="block">
@@ -147,7 +147,7 @@ function Campos() {
         </button>
       </form>
 
-      <ul className="divide-y divide-gray-200 rounded-md border border-gray-200">
+      <ul className="divide-y divide-gray-200 rounded-md border border-gray-300">
         {campos.map((c) =>
           editandoId === c.id ? (
             <li key={c.id} className="space-y-2 p-3 text-sm">
@@ -193,7 +193,7 @@ function Campos() {
                 >
                   Guardar
                 </button>
-                <button type="button" onClick={cancelarEdicion} className="text-xs text-gray-500 underline">
+                <button type="button" onClick={cancelarEdicion} className="text-xs text-gray-700 underline">
                   Cancelar
                 </button>
               </div>
@@ -202,7 +202,7 @@ function Campos() {
             <li key={c.id} className="flex items-center justify-between p-3 text-sm">
               <div>
                 <div className="text-gray-900">{c.nombre}</div>
-                {c.ubicacion && <div className="text-gray-500">{c.ubicacion}</div>}
+                {c.ubicacion && <div className="text-gray-700">{c.ubicacion}</div>}
                 {c.latitud != null && (
                   <div className="text-xs text-brand-primary">
                     · marcado en mapa ({Number(c.latitud).toFixed(4)}, {Number(c.longitud).toFixed(4)})
@@ -220,7 +220,7 @@ function Campos() {
             </li>
           )
         )}
-        {campos.length === 0 && <li className="p-3 text-sm text-gray-500">Todavía no hay campos cargados.</li>}
+        {campos.length === 0 && <li className="p-3 text-sm text-gray-700">Todavía no hay campos cargados.</li>}
       </ul>
     </div>
   )

@@ -66,9 +66,9 @@ function SimuladorCompras() {
         </p>
       )}
 
-      <form onSubmit={calcular} className="space-y-3 rounded-md border border-gray-200 p-4">
+      <form onSubmit={calcular} className="space-y-3 rounded-md border border-gray-300 p-4">
         <h2 className="text-sm font-medium text-brand-primary-dark">Simulador de compras</h2>
-        <p className="text-xs text-gray-400">
+        <p className="text-xs text-gray-600">
           Estimación rápida del costo de una compra en dólares — no queda guardada como historial.
         </p>
 
@@ -132,7 +132,7 @@ function SimuladorCompras() {
                 {buscandoCotizacion ? '...' : 'Actualizar'}
               </button>
             </div>
-            {fuenteCotizacion && <p className="mt-1 text-xs text-gray-400">Fuente: {fuenteCotizacion}</p>}
+            {fuenteCotizacion && <p className="mt-1 text-xs text-gray-600">Fuente: {fuenteCotizacion}</p>}
           </label>
         </div>
 
@@ -160,7 +160,7 @@ function SimuladorCompras() {
             <p className="font-medium text-brand-primary-dark">
               Total: U$S {resultado.total_usd} · $ {resultado.total_ars} ARS
             </p>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-700">
               {resultado.insumo_nombre} ({resultado.unidad_medida}) · cotización usada: $
               {resultado.cotizacion_usada} ARS/USD
             </p>

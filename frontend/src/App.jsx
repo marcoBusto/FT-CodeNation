@@ -25,15 +25,18 @@ function App() {
     <div className="mx-auto max-w-2xl p-8">
       <header>
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-semibold text-brand-primary-dark">Stock e Insumos Agrícolas</h1>
-          <div className="flex items-center gap-3 text-xs text-gray-500">
+          <div>
+            <h1 className="text-2xl font-semibold text-brand-primary-dark">FT-CodeNation</h1>
+            <p className="text-sm text-gray-700">Gestión de Stock e Insumos Agrícolas</p>
+          </div>
+          <div className="flex items-center gap-3 text-xs text-gray-700">
             <span>{usuario.nombre}</span>
-            <button onClick={salir} className="text-gray-400 underline hover:text-gray-600">
+            <button onClick={salir} className="text-gray-600 underline hover:text-gray-600">
               Cerrar sesión
             </button>
           </div>
         </div>
-        <nav className="mt-4 flex flex-wrap gap-2 border-b border-gray-200">
+        <nav className="mt-4 flex flex-wrap gap-2 border-b border-gray-300">
           <Pestaña activa={vista === 'campos'} onClick={() => setVista('campos')}>
             Campos
           </Pestaña>
@@ -68,8 +71,8 @@ function App() {
         {vista === 'simulador' && <SimuladorCompras />}
       </main>
 
-      <footer className="mt-12 flex items-center gap-2 border-t border-gray-200 pt-4 text-xs text-gray-400">
-        <img src="/codenation-logo.webp" alt="CodeNation" className="h-4 w-auto opacity-70" />
+      <footer className="mt-12 flex items-center gap-2 rounded-md bg-black px-4 py-3 text-xs text-white">
+        <img src="/codenation-logo.webp" alt="CodeNation" className="h-4 w-auto" />
         <span>Powered by CodeNation-SC — © {new Date().getFullYear()}</span>
       </footer>
     </div>
@@ -83,7 +86,7 @@ function Pestaña({ activa, onClick, children }) {
       className={`-mb-px border-b-2 px-3 py-2 text-sm font-medium ${
         activa
           ? 'border-brand-primary text-brand-primary-dark'
-          : 'border-transparent text-gray-500 hover:text-gray-700'
+          : 'border-transparent text-gray-700 hover:text-gray-700'
       }`}
     >
       {children}
@@ -115,7 +118,8 @@ function Login({ onIngresar }) {
 
   return (
     <div className="mx-auto max-w-sm p-8">
-      <h1 className="text-xl font-semibold text-brand-primary-dark">Stock e Insumos Agrícolas</h1>
+      <h1 className="text-xl font-semibold text-brand-primary-dark">FT-CodeNation</h1>
+      <p className="text-sm text-gray-700">Gestión de Stock e Insumos Agrícolas</p>
       <form onSubmit={ingresar} className="mt-4 space-y-3">
         <label className="block">
           <span className="text-sm text-gray-700">Email</span>

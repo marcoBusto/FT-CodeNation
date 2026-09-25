@@ -99,14 +99,14 @@ function MapaLote({ onPoligonoCompleto }) {
 
   return (
     <div className="relative">
-      <div ref={contenedorRef} className="h-96 w-full rounded-md border border-gray-200" />
+      <div ref={contenedorRef} className="h-96 w-full rounded-md border border-gray-300" />
 
       {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
 
       {dibujando && !error && (
         <div className="absolute left-3 top-3 rounded-md bg-white/95 p-3 text-sm shadow-md">
           <p className="text-gray-700">Hacé click en el mapa para marcar cada esquina del lote.</p>
-          <p className="mt-1 text-xs text-gray-500">
+          <p className="mt-1 text-xs text-gray-700">
             {cantidadPuntos} punto{cantidadPuntos === 1 ? '' : 's'} marcado{cantidadPuntos === 1 ? '' : 's'}
           </p>
           <button
@@ -123,7 +123,7 @@ function MapaLote({ onPoligonoCompleto }) {
       {metricas && (
         <div className="absolute right-3 top-3 rounded-md bg-white/95 p-3 shadow-md">
           <p className="text-sm font-semibold text-brand-primary-dark">{metricas.areaHectareas} ha</p>
-          <p className="text-xs text-gray-500">Perímetro: {metricas.perimetroMetros} m</p>
+          <p className="text-xs text-gray-700">Perímetro: {metricas.perimetroMetros} m</p>
           <button type="button" onClick={redibujar} className="mt-2 text-xs text-brand-primary underline">
             Redibujar
           </button>

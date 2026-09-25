@@ -68,7 +68,7 @@ function Movimientos() {
         </p>
       )}
 
-      <form onSubmit={registrarMovimiento} className="space-y-3 rounded-md border border-gray-200 p-4">
+      <form onSubmit={registrarMovimiento} className="space-y-3 rounded-md border border-gray-300 p-4">
         <h2 className="text-sm font-medium text-brand-primary-dark">Nuevo movimiento</h2>
         <div className="grid grid-cols-2 gap-3">
           <label className="block">
@@ -171,24 +171,24 @@ function Movimientos() {
         </button>
       </form>
 
-      <ul className="divide-y divide-gray-200 rounded-md border border-gray-200">
+      <ul className="divide-y divide-gray-200 rounded-md border border-gray-300">
         {movimientos.map((m) => (
           <li key={m.id} className="p-3 text-sm">
             <div className="flex items-center justify-between gap-2">
               <span className="font-medium text-gray-900">{m.tipo}</span>
-              <span className="text-gray-500">{m.cantidad_total} {m.unidad_medida}</span>
+              <span className="text-gray-700">{m.cantidad_total} {m.unidad_medida}</span>
             </div>
-            <div className="mt-1 text-gray-500">
+            <div className="mt-1 text-gray-700">
               {m.insumo_nombre}
               {m.lote_nombre && ` · ${m.lote_nombre}`}
               {m.dosis_por_ha && ` · ${m.dosis_por_ha}/ha`}
               {' · '}
               {m.usuario_nombre} · {m.fecha_hora}
             </div>
-            {m.observacion && <div className="mt-1 text-gray-400">{m.observacion}</div>}
+            {m.observacion && <div className="mt-1 text-gray-600">{m.observacion}</div>}
           </li>
         ))}
-        {movimientos.length === 0 && <li className="p-3 text-sm text-gray-500">Todavía no hay movimientos.</li>}
+        {movimientos.length === 0 && <li className="p-3 text-sm text-gray-700">Todavía no hay movimientos.</li>}
       </ul>
     </div>
   )

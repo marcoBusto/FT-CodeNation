@@ -124,7 +124,7 @@ function Insumos() {
         </p>
       )}
 
-      <form onSubmit={crearInsumo} className="space-y-3 rounded-md border border-gray-200 p-4">
+      <form onSubmit={crearInsumo} className="space-y-3 rounded-md border border-gray-300 p-4">
         <h2 className="text-sm font-medium text-brand-primary-dark">Nuevo insumo</h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           <label className="block">
@@ -216,7 +216,7 @@ function Insumos() {
         </button>
       </form>
 
-      <ul className="divide-y divide-gray-200 rounded-md border border-gray-200">
+      <ul className="divide-y divide-gray-200 rounded-md border border-gray-300">
         {stock.map((i) =>
           editandoId === i.id ? (
             <li key={i.id} className="space-y-2 p-3 text-sm">
@@ -276,7 +276,7 @@ function Insumos() {
                 >
                   Guardar
                 </button>
-                <button type="button" onClick={cancelarEdicion} className="text-xs text-gray-500 underline">
+                <button type="button" onClick={cancelarEdicion} className="text-xs text-gray-700 underline">
                   Cancelar
                 </button>
               </div>
@@ -285,11 +285,11 @@ function Insumos() {
             <li key={i.id} className="flex items-center justify-between p-3 text-sm">
               <span className="text-gray-900">
                 {i.nombre}
-                {i.marca_nombre && <span className="text-gray-500"> · {i.marca_nombre}</span>}
+                {i.marca_nombre && <span className="text-gray-700"> · {i.marca_nombre}</span>}
                 {i.categoria_nombre && <span className="ml-2 text-xs text-brand-primary">{i.categoria_nombre}</span>}
               </span>
               <div className="flex items-center gap-3">
-                <span className={Number(i.stock_actual) <= 0 ? 'font-medium text-red-600' : 'text-gray-500'}>
+                <span className={Number(i.stock_actual) <= 0 ? 'font-medium text-red-600' : 'text-gray-700'}>
                   {i.stock_actual} {i.unidad_medida}
                 </span>
                 <button type="button" onClick={() => empezarEdicion(i)} className="text-xs text-brand-primary underline">
@@ -302,7 +302,7 @@ function Insumos() {
             </li>
           )
         )}
-        {stock.length === 0 && <li className="p-3 text-sm text-gray-500">Todavía no hay insumos cargados.</li>}
+        {stock.length === 0 && <li className="p-3 text-sm text-gray-700">Todavía no hay insumos cargados.</li>}
       </ul>
     </div>
   )

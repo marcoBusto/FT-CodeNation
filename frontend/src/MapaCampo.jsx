@@ -51,10 +51,10 @@ function MapaCampo({ latitud, longitud, onUbicacionCambiada }) {
 
   return (
     <div>
-      <div ref={contenedorRef} className="h-72 w-full rounded-md border border-gray-200" />
+      <div ref={contenedorRef} className="h-72 w-full rounded-md border border-gray-300" />
       {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
       {!error && (
-        <p className="mt-1 text-xs text-gray-500">
+        <p className="mt-1 text-xs text-gray-700">
           Hacé click en el mapa o arrastrá el marcador para fijar la ubicación exacta del campo.
         </p>
       )}

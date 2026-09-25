@@ -101,9 +101,9 @@ function Lotes() {
         </p>
       )}
 
-      <form onSubmit={crearLote} className="space-y-3 rounded-md border border-gray-200 p-4">
+      <form onSubmit={crearLote} className="space-y-3 rounded-md border border-gray-300 p-4">
         <h2 className="text-sm font-medium text-brand-primary-dark">Nuevo lote</h2>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <label className="block">
             <span className="text-sm text-gray-700">Campo</span>
             <select required value={nuevoLote.campo_id} onChange={actualizarLote('campo_id')} className="campo mt-1">
@@ -141,7 +141,7 @@ function Lotes() {
 
         <div>
           <span className="text-sm text-gray-700">Dibujar el lote en el mapa (opcional)</span>
-          <p className="mb-2 text-xs text-gray-400">
+          <p className="mb-2 text-xs text-gray-600">
             Al terminar el polígono se completan las hectáreas solas — igual las podés ajustar a mano.
           </p>
           <MapaLote key={mapaKey} onPoligonoCompleto={alCompletarPoligono} />
@@ -163,11 +163,11 @@ function Lotes() {
         </button>
       </form>
 
-      <ul className="divide-y divide-gray-200 rounded-md border border-gray-200">
+      <ul className="divide-y divide-gray-200 rounded-md border border-gray-300">
         {lotes.map((l) =>
           editandoId === l.id ? (
             <li key={l.id} className="space-y-2 p-3 text-sm">
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <select
                   value={loteEnEdicion.campo_id}
                   onChange={(e) => setLoteEnEdicion({ ...loteEnEdicion, campo_id: e.target.value })}
@@ -209,7 +209,7 @@ function Lotes() {
                 >
                   Guardar
                 </button>
-                <button type="button" onClick={cancelarEdicion} className="text-xs text-gray-500 underline">
+                <button type="button" onClick={cancelarEdicion} className="text-xs text-gray-700 underline">
                   Cancelar
                 </button>
               </div>
@@ -218,11 +218,11 @@ function Lotes() {
             <li key={l.id} className="flex items-center justify-between p-3 text-sm">
               <div>
                 <span className="text-gray-900">{l.nombre}</span>
-                <span className="ml-2 text-gray-500">({l.campo_nombre})</span>
+                <span className="ml-2 text-gray-700">({l.campo_nombre})</span>
                 {l.poligono && <span className="ml-2 text-xs text-brand-primary">· dibujado en mapa</span>}
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-gray-500">
+                <span className="text-gray-700">
                   {l.hectareas} ha{l.perimetro_metros && ` · ${l.perimetro_metros} m perímetro`}
                 </span>
                 <button type="button" onClick={() => empezarEdicion(l)} className="text-xs text-brand-primary underline">
@@ -235,7 +235,7 @@ function Lotes() {
             </li>
           )
         )}
-        {lotes.length === 0 && <li className="p-3 text-sm text-gray-500">Todavía no hay lotes cargados.</li>}
+        {lotes.length === 0 && <li className="p-3 text-sm text-gray-700">Todavía no hay lotes cargados.</li>}
       </ul>
     </div>
   )

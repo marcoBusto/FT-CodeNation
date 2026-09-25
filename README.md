@@ -71,6 +71,10 @@ mysql -u root stock_agricola_test < database/schema.sql
 cd backend && vendor/bin/phpunit
 ```
 
+## Roadmap — segunda versión (no prevista para esta entrega)
+
+- Módulo de drones: que reciba directamente el archivo que genera el dron (en vez de carga manual). Falta definir formato de archivo y flujo exacto.
+
 ## Documentación
 
 - [docs/ARQUITECTURA.md](docs/ARQUITECTURA.md) — arquitectura del sistema y flujo de datos
