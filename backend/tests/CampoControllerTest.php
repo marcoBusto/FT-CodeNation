@@ -79,4 +79,57 @@ final class CampoControllerTest extends DatabaseTestCase
         $this->assertArrayHasKey('errores', $resultado);
         $this->assertCount(1, CampoController::listar($tenantA));
     }
+
+    public function testCrearRechazaNombreDuplicadoEnElMismoTenant(): void
+    {
+        $tenantId = $this->crearTenant();
+        $this->crearCampo($tenantId, 'Campo Norte');
+
+        $resultado = CampoController::crear($tenantId, ['nombre' => 'Campo Norte']);
+
+        $this->assertArrayHasKey('errores', $resultado);
+    }
+
+    public function testCrearPermiteElMismoNombreEnTenantsDistintos(): void
+    {
+        $tenantA = $this->crearTenant('Tenant A');
+        $tenantB = $this->crearTenant('Tenant B');
+        $this->crearCampo($tenantA, 'Campo Norte');
+
+        $resultado = CampoController::crear($tenantB, ['nombre' => 'Campo Norte']);
+
+        $this->assertArrayHasKey('id', $resultado);
+    }
+
+    public function testCrearPermiteReusarNombreDeCampoDesactivado(): void
+    {
+        $tenantId = $this->crearTenant();
+        $campoId = $this->crearCampo($tenantId, 'Campo Norte');
+        CampoController::eliminar($tenantId, $campoId);
+
+        $resultado = CampoController::crear($tenantId, ['nombre' => 'Campo Norte']);
+
+        $this->assertArrayHasKey('id', $resultado);
+    }
+
+    public function testEditarPermiteConservarElPropioNombre(): void
+    {
+        $tenantId = $this->crearTenant();
+        $campoId = $this->crearCampo($tenantId, 'Campo Norte');
+
+        $resultado = CampoController::editar($tenantId, $campoId, ['nombre' => 'Campo Norte', 'ubicacion' => 'Nueva ubicación']);
+
+        $this->assertArrayHasKey('id', $resultado);
+    }
+
+    public function testEditarRechazaNombreDuplicadoDeOtroCampo(): void
+    {
+        $tenantId = $this->crearTenant();
+        $this->crearCampo($tenantId, 'Campo Norte');
+        $campoSur = $this->crearCampo($tenantId, 'Campo Sur');
+
+        $resultado = CampoController::editar($tenantId, $campoSur, ['nombre' => 'Campo Norte']);
+
+        $this->assertArrayHasKey('errores', $resultado);
+    }
 }

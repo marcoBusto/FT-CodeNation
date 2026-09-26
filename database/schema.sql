@@ -52,6 +52,10 @@ CREATE TABLE usuarios (
     nombre VARCHAR(100) NOT NULL,
     email VARCHAR(150) NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
+    -- Se incrementa al cerrar sesión (o, a futuro, al cambiar contraseña):
+    -- invalida de una todos los JWT ya emitidos para este usuario, porque
+    -- cada token lleva la versión vigente al momento de generarse.
+    token_version INT NOT NULL DEFAULT 0,
     estado ENUM('activo', 'inactivo') NOT NULL DEFAULT 'activo',
     creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (tenant_id) REFERENCES tenants(id),

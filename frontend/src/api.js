@@ -23,9 +23,18 @@ export function guardarSesion(token, usuario) {
   localStorage.setItem('auth_usuario', JSON.stringify(usuario))
 }
 
+// Invalida el token en el servidor (ver Auth::invalidarSesiones) y recién
+// después borra la sesión local -- así "cerrar sesión" hace que ese token
+// deje de servir para cualquiera que lo tenga, no solo en este navegador.
+// Si falla la llamada (sin conexión, etc.) igual se borra localmente: el
+// usuario no debe quedar trabado sin poder salir.
 export function cerrarSesion() {
-  localStorage.removeItem('auth_token')
-  localStorage.removeItem('auth_usuario')
+  return apiFetch('/logout', { method: 'POST' })
+    .catch(() => {})
+    .finally(() => {
+      localStorage.removeItem('auth_token')
+      localStorage.removeItem('auth_usuario')
+    })
 }
 
 export function apiFetch(ruta, opciones = {}) {

@@ -121,6 +121,11 @@ try {
     $tenantId = $sesion['tenant_id'];
     $usuarioId = $sesion['usuario_id'];
 
+    if ($ruta === '/logout' && $metodo === 'POST') {
+        responder(AuthController::logout($usuarioId));
+        return;
+    }
+
     if ($ruta === '/campos' && $metodo === 'GET') {
         responder(CampoController::listar($tenantId));
         return;

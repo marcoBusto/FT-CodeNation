@@ -116,4 +116,50 @@ final class LoteControllerTest extends DatabaseTestCase
         $this->assertArrayHasKey('id', $resultado);
         $this->assertCount(0, LoteController::listar($tenantId));
     }
+
+    public function testCrearRechazaNombreDuplicadoEnElMismoCampo(): void
+    {
+        $tenantId = $this->crearTenant();
+        $campoId = $this->crearCampo($tenantId);
+        $this->crearLote($tenantId, $campoId, 10.0, 'Lote 1');
+
+        $resultado = LoteController::crear($tenantId, ['campo_id' => $campoId, 'nombre' => 'Lote 1', 'hectareas' => 5]);
+
+        $this->assertArrayHasKey('errores', $resultado);
+    }
+
+    public function testCrearPermiteElMismoNombreEnCampoDistinto(): void
+    {
+        $tenantId = $this->crearTenant();
+        $campoA = $this->crearCampo($tenantId, 'Campo A');
+        $campoB = $this->crearCampo($tenantId, 'Campo B');
+        $this->crearLote($tenantId, $campoA, 10.0, 'Lote 1');
+
+        $resultado = LoteController::crear($tenantId, ['campo_id' => $campoB, 'nombre' => 'Lote 1', 'hectareas' => 5]);
+
+        $this->assertArrayHasKey('id', $resultado);
+    }
+
+    public function testCrearPermiteReusarNombreDeLoteDesactivado(): void
+    {
+        $tenantId = $this->crearTenant();
+        $campoId = $this->crearCampo($tenantId);
+        $loteId = $this->crearLote($tenantId, $campoId, 10.0, 'Lote 1');
+        LoteController::eliminar($tenantId, $loteId);
+
+        $resultado = LoteController::crear($tenantId, ['campo_id' => $campoId, 'nombre' => 'Lote 1', 'hectareas' => 5]);
+
+        $this->assertArrayHasKey('id', $resultado);
+    }
+
+    public function testEditarPermiteConservarElPropioNombre(): void
+    {
+        $tenantId = $this->crearTenant();
+        $campoId = $this->crearCampo($tenantId);
+        $loteId = $this->crearLote($tenantId, $campoId, 10.0, 'Lote 1');
+
+        $resultado = LoteController::editar($tenantId, $loteId, ['campo_id' => $campoId, 'nombre' => 'Lote 1', 'hectareas' => 12]);
+
+        $this->assertArrayHasKey('id', $resultado);
+    }
 }

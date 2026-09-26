@@ -59,7 +59,7 @@ class LoteController
             return ['errores' => ['El lote indicado no existe.']];
         }
 
-        $errores = self::validar($tenantId, $datos);
+        $errores = self::validar($tenantId, $datos, $id);
         if (!empty($errores)) {
             return ['errores' => $errores];
         }
@@ -132,7 +132,9 @@ class LoteController
         return ['cantidad_total_estimada' => round((float) $hectareas * (float) $dosisPorHa, 2)];
     }
 
-    private static function validar(int $tenantId, array $datos): array
+    // $idAExcluir: al editar, el lote no debe chocar contra su propia fila
+    // en la verificación de duplicados.
+    private static function validar(int $tenantId, array $datos, ?int $idAExcluir = null): array
     {
         $errores = [];
         $pdo = Database::getConnection();
@@ -148,8 +150,27 @@ class LoteController
             }
         }
 
-        if (trim($datos['nombre'] ?? '') === '') {
+        $nombre = trim($datos['nombre'] ?? '');
+        if ($nombre === '') {
             $errores[] = 'Falta indicar el nombre del lote.';
+        } elseif ($campoId !== '' && ctype_digit((string) $campoId)) {
+            // Único dentro de su propio Campo, no de todo el tenant: el mismo
+            // nombre de lote puede repetirse legítimamente en Campos distintos
+            // (ej. "Lote 1" en cada campo).
+            $stmt = $pdo->prepare(
+                "SELECT 1 FROM lotes
+                 WHERE tenant_id = :tenant_id AND campo_id = :campo_id AND nombre = :nombre
+                   AND estado = 'activo' AND id != :id_excluido"
+            );
+            $stmt->execute([
+                'tenant_id' => $tenantId,
+                'campo_id' => $campoId,
+                'nombre' => $nombre,
+                'id_excluido' => $idAExcluir ?? 0,
+            ]);
+            if ($stmt->fetchColumn()) {
+                $errores[] = 'Ya existe un lote activo con ese nombre en ese campo.';
+            }
         }
 
         $hectareas = $datos['hectareas'] ?? '';

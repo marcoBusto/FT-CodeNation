@@ -61,4 +61,33 @@ final class AuthControllerTest extends DatabaseTestCase
 
         $this->assertArrayHasKey('errores', $resultado);
     }
+
+    public function testLogoutInvalidaElTokenAnterior(): void
+    {
+        $tenantId = $this->crearTenant();
+        $this->crearUsuario($tenantId, 'marco@example.com');
+
+        $login = AuthController::login(['email' => 'marco@example.com', 'contrasena' => 'secreto']);
+        $sesion = Auth::resolverDesdeToken($login['token']);
+
+        AuthController::logout($sesion['usuario_id']);
+
+        $this->expectException(DomainException::class);
+        Auth::resolverDesdeToken($login['token']);
+    }
+
+    public function testLoginDespuesDeLogoutEmiteUnTokenNuevoValido(): void
+    {
+        $tenantId = $this->crearTenant();
+        $this->crearUsuario($tenantId, 'marco@example.com');
+
+        $primerLogin = AuthController::login(['email' => 'marco@example.com', 'contrasena' => 'secreto']);
+        $sesion = Auth::resolverDesdeToken($primerLogin['token']);
+        AuthController::logout($sesion['usuario_id']);
+
+        $segundoLogin = AuthController::login(['email' => 'marco@example.com', 'contrasena' => 'secreto']);
+        $sesionNueva = Auth::resolverDesdeToken($segundoLogin['token']);
+
+        $this->assertSame($sesion['usuario_id'], $sesionNueva['usuario_id']);
+    }
 }

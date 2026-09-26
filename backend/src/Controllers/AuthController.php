@@ -13,7 +13,7 @@ class AuthController
 
         $pdo = Database::getConnection();
         $stmt = $pdo->prepare(
-            "SELECT u.id, u.tenant_id, u.nombre, u.email, u.password_hash
+            "SELECT u.id, u.tenant_id, u.nombre, u.email, u.password_hash, u.token_version
              FROM usuarios u
              INNER JOIN tenants t ON t.id = u.tenant_id
              WHERE u.email = :email AND u.estado = 'activo' AND t.estado = 'activo'"
@@ -29,7 +29,8 @@ class AuthController
             (int) $usuario['id'],
             (int) $usuario['tenant_id'],
             $usuario['nombre'],
-            $usuario['email']
+            $usuario['email'],
+            (int) $usuario['token_version']
         );
 
         return [
@@ -40,5 +41,15 @@ class AuthController
                 'email' => $usuario['email'],
             ],
         ];
+    }
+
+    // Invalida el token actual (y cualquier otro ya emitido) del lado del
+    // servidor -- antes "cerrar sesión" solo borraba el token en el
+    // navegador, y seguía siendo válido en la API hasta que venciera solo.
+    public static function logout(int $usuarioId): array
+    {
+        Auth::invalidarSesiones($usuarioId);
+
+        return ['ok' => true];
     }
 }

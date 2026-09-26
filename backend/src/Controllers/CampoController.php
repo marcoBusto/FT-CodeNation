@@ -18,7 +18,7 @@ class CampoController
 
     public static function crear(int $tenantId, array $datos): array
     {
-        $errores = self::validar($datos);
+        $errores = self::validar($tenantId, $datos);
         if (!empty($errores)) {
             return ['errores' => $errores];
         }
@@ -45,7 +45,7 @@ class CampoController
             return ['errores' => ['El campo indicado no existe.']];
         }
 
-        $errores = self::validar($datos);
+        $errores = self::validar($tenantId, $datos, $id);
         if (!empty($errores)) {
             return ['errores' => $errores];
         }
@@ -94,12 +94,25 @@ class CampoController
         return (bool) $stmt->fetchColumn();
     }
 
-    private static function validar(array $datos): array
+    // $idAExcluir: al editar, el campo no debe chocar contra su propia fila
+    // en la verificación de duplicados.
+    private static function validar(int $tenantId, array $datos, ?int $idAExcluir = null): array
     {
         $errores = [];
+        $nombre = trim($datos['nombre'] ?? '');
 
-        if (trim($datos['nombre'] ?? '') === '') {
+        if ($nombre === '') {
             $errores[] = 'Falta indicar el nombre del campo.';
+        } else {
+            $pdo = Database::getConnection();
+            $stmt = $pdo->prepare(
+                "SELECT 1 FROM campos
+                 WHERE tenant_id = :tenant_id AND nombre = :nombre AND estado = 'activo' AND id != :id_excluido"
+            );
+            $stmt->execute(['tenant_id' => $tenantId, 'nombre' => $nombre, 'id_excluido' => $idAExcluir ?? 0]);
+            if ($stmt->fetchColumn()) {
+                $errores[] = 'Ya existe un campo activo con ese nombre.';
+            }
         }
 
         $latitud = $datos['latitud'] ?? '';
