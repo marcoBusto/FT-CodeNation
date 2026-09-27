@@ -199,3 +199,14 @@ Registro de decisiones importantes del proyecto y su justificación, para no per
 - Leer el QR físico del bidón con la cámara (para no tener que tipear el lote a mano) sigue siendo una mejora futura opcional, no un requisito para la v1 de esta función — se puede lanzar sin cámara todavía.
 
 **Todavía pendiente:** confirmar con el cliente si el `productCode` de SENASA es un dato que van a tener a mano fácilmente (además del número de lote), y si el distribuidor que usa el cliente efectivamente participa del sistema (es obligatorio, pero vale confirmar en la práctica).
+
+## 2026-09-27 — Descartada la migración a app nativa; aclaración sobre obligaciones SENASA
+
+**Contexto:** Marco compartió una respuesta de otra herramienta de IA sugiriendo desarrollar una APK nativa (Kotlin/Flutter) con lector GS1 DataMatrix, GPS, base local offline (Room/SQLite) e integración con los web services de SENASA para *reportar* movimientos (`WS_INFO_EMPRESAS`).
+
+**Decisión: no se sigue ese camino.**
+- **Cambio de stack descartado:** pasar a app nativa es una migración tecnológica mayor no justificada (regla 4 de CLAUDE.md) frente a una alternativa mucho más chica: leer QR/código de barras desde la cámara del navegador, dentro de la web app React ya existente (librerías JS para esto, sin librería nueva de peso todavía a definir cuál si se llega a necesitar).
+- **No hace falta integrar los web services de SENASA para reportar.** Se confirmó (fuente: manual técnico de SENASA) que la obligación de declarar cada venta con el CUIT del comprador es del **distribuidor**, no del productor/usuario final — para el productor, informar sus propias compras a SENASA es **opcional**. Alcanza con consultar/mostrar la página pública de SENASA (ver entrada anterior), no con reportar nada.
+- **Trabajo offline (zonas rurales sin señal):** preocupación legítima, pero resoluble con tecnología web (service worker + almacenamiento local del navegador) más adelante si hace falta — no requiere una app nativa. No es un requisito para la v1.
+
+**Hallazgo nuevo, separado de la trazabilidad de uso:** Ley 27.279 (CampoLimpio) obliga al productor a devolver el envase vacío dentro del año de la compra a un punto autorizado. Es un problema distinto (gestión de residuos, no trazabilidad de aplicación) — candidato a una funcionalidad futura simple ("recordatorio: este bidón vence su plazo de devolución el [fecha compra + 1 año]"), pero no se mezcla con el diseño de trazabilidad de uso ya registrado arriba.
