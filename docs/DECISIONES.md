@@ -180,3 +180,22 @@ Registro de decisiones importantes del proyecto y su justificación, para no per
 **Tercera opción a investigar (idea de Marco, 2026-09-27):** en vez de depender de un QR físico en el bidón, el mayorista/distribuidor podría tener su propia API de rastreo de lote/partida -- si existe y el cliente puede acceder a ella, sería más confiable que leer una etiqueta física (no depende de que el bidón conserve el QR en buen estado). Hay que confirmar con el cliente si el mayorista real que usa ofrece algo así.
 
 **Siguiente paso concreto:** Marco tiene que averiguar con el cliente/ingeniero (a) cómo son los bidones reales que usan (¿traen QR o código de barras de fábrica? ¿es único por bidón?), y (b) si el mayorista/distribuidor tiene alguna API o sistema de rastreo de lote que se pueda integrar, antes de que esto se pueda dimensionar en serio.
+
+## 2026-09-27 — Hallazgo que simplifica la trazabilidad: existe SENASA AgroTraza (sistema nacional)
+
+**Investigación pedida por Marco** (¿el mayorista tiene alguna API de rastreo?): sí, y es mejor de lo esperado — no es de un mayorista puntual, es **nacional y obligatorio por ley**.
+
+**Lo que se confirmó (fuentes oficiales, argentina.gob.ar):**
+- SENASA opera el "Sistema Nacional de Trazabilidad de Productos Fitosanitarios" ("AgroTraza"), obligatorio para toda la cadena comercial (importador → distribuidor → comercio) desde el 1° de abril de 2025.
+- Cada lote de producto vendido debe informarse (recepción, envío, venta), incluyendo el CUIT del comprador final. El **remito/factura de cada compra ya trae el número de lote SENASA** por normativa.
+- El QR en el envase es opcional para el distribuidor, pero **si lo usan, la normativa exige que apunte a una URL de SENASA** con esta forma: `https://aps2.senasa.gov.ar/agrotraza/src/app/?action=showDetailPublicProduct&productCode={codigo}&batchId={lote}` — página pública, sin necesidad de credenciales, con el detalle oficial del producto y lote.
+- Existe además una **API REST documentada** (ambiente de test y producción, manuales técnicos publicados) para consultar códigos de producto, tipo de envase, principio activo, etc. — pensada para que empresas de la cadena reporten movimientos, pero los métodos de "consulta" son de uso más abierto.
+
+**Cómo cambia el diseño de la entrada anterior (2026-09-27, "Trazabilidad de bidón por QR"):**
+- **No hace falta construir un sistema propio de "partidas" con QR generado por nosotros para la v1.** El número de lote SENASA ya es el identificador universal, y el usuario ya lo tiene a mano en cada remito.
+- MVP más simple y rápido: al registrar una ENTRADA, campo opcional "N° de lote" (texto libre, tal como figura en el remito). Guardarlo en `movimientos_insumo` (o en la futura tabla `partidas` si se quiere separar stock por lote — esa parte del diseño anterior sigue siendo válida si se quiere trazar consumo interno) alcanza para lo básico.
+- Para "ver el origen": un simple link/botón "Ver en SENASA" que arma la URL pública de arriba con el código de producto y lote cargados — sin scrapear ni pedir acceso a nada, es una página pública.
+- Para "ver dónde se usó": eso sigue siendo 100% interno (nuestros propios movimientos), como ya estaba diseñado.
+- Leer el QR físico del bidón con la cámara (para no tener que tipear el lote a mano) sigue siendo una mejora futura opcional, no un requisito para la v1 de esta función — se puede lanzar sin cámara todavía.
+
+**Todavía pendiente:** confirmar con el cliente si el `productCode` de SENASA es un dato que van a tener a mano fácilmente (además del número de lote), y si el distribuidor que usa el cliente efectivamente participa del sistema (es obligatorio, pero vale confirmar en la práctica).
