@@ -126,6 +126,11 @@ try {
         return;
     }
 
+    if ($ruta === '/cambiar-contrasena' && $metodo === 'POST') {
+        responderResultado(AuthController::cambiarContrasena($usuarioId, $cuerpo()));
+        return;
+    }
+
     if ($ruta === '/campos' && $metodo === 'GET') {
         responder(CampoController::listar($tenantId));
         return;

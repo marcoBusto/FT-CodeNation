@@ -7,6 +7,7 @@ import Movimientos from './Movimientos'
 import Combustible from './Combustible'
 import Reportes from './Reportes'
 import SimuladorCompras from './SimuladorCompras'
+import CambiarContrasena from './CambiarContrasena'
 
 function App() {
   const [usuario, setUsuario] = useState(obtenerUsuario())
@@ -24,13 +25,16 @@ function App() {
   return (
     <div className="mx-auto max-w-2xl p-8">
       <header>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
             <h1 className="text-2xl font-semibold text-brand-primary-dark">FT-CodeNation</h1>
             <p className="text-sm text-gray-700">Gestión de Stock e Insumos Agrícolas</p>
           </div>
           <div className="flex items-center gap-3 text-xs text-gray-700">
             <span>{usuario.nombre}</span>
+            <button onClick={() => setVista('cuenta')} className="text-gray-600 underline hover:text-gray-600">
+              Cambiar contraseña
+            </button>
             <button onClick={salir} className="text-gray-600 underline hover:text-gray-600">
               Cerrar sesión
             </button>
@@ -69,6 +73,7 @@ function App() {
         {vista === 'combustible' && <Combustible />}
         {vista === 'reportes' && <Reportes />}
         {vista === 'simulador' && <SimuladorCompras />}
+        {vista === 'cuenta' && <CambiarContrasena />}
       </main>
 
       <footer className="mt-12 flex items-center gap-2 rounded-md bg-black px-4 py-3 text-xs text-white">
@@ -105,15 +110,19 @@ function Login({ onIngresar }) {
     setError(null)
     setCargando(true)
 
-    apiFetch('/login', { method: 'POST', body: JSON.stringify({ email, contrasena }) }).then((res) => {
-      setCargando(false)
-      if (res.error) {
-        setError(res.error.detalles?.[0] ?? res.error.mensaje)
-      } else {
-        guardarSesion(res.data.token, res.data.usuario)
-        onIngresar(res.data.usuario)
-      }
-    })
+    // Sin el catch, un fallo de red (sin señal en el campo, servidor caído)
+    // dejaba el botón trabado en "Ingresando..." sin ningún mensaje.
+    apiFetch('/login', { method: 'POST', body: JSON.stringify({ email, contrasena }) })
+      .then((res) => {
+        if (res.error) {
+          setError(res.error.detalles?.[0] ?? res.error.mensaje)
+        } else {
+          guardarSesion(res.data.token, res.data.usuario)
+          onIngresar(res.data.usuario)
+        }
+      })
+      .catch(() => setError('No se pudo conectar con el servidor. Revisá la conexión e intentá de nuevo.'))
+      .finally(() => setCargando(false))
   }
 
   return (

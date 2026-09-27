@@ -6,6 +6,18 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["--prefix", "frontend", "run", "dev"],
       "port": 5173
+    },
+    {
+      "name": "frontend-vite-local-api",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "set VITE_API_URL=http://localhost:8000&& npm --prefix frontend run dev"],
+      "port": 5173
+    },
+    {
+      "name": "backend-php",
+      "runtimeExecutable": "C:/wamp64/bin/php/php8.3.14/php.exe",
+      "runtimeArgs": ["-S", "localhost:8000", "-t", "backend/public"],
+      "port": 8000
     }
   ]
 }

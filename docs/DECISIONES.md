@@ -219,3 +219,16 @@ Registro de decisiones importantes del proyecto y su justificación, para no per
 - Durante la beta no se suman funcionalidades nuevas: el foco es **corregir errores** que reporte el cliente o que salgan de la auditoría.
 - Lo ya diseñado pero no construido (cultivo/campaña por lote, N° de lote SENASA, agente de IA) queda para la versión siguiente, después de cerrar la beta.
 - Puntos operativos a revisar en la auditoría (no son features nuevas del producto): separar al cliente del tenant de demo, backups automáticos de la base de producción, cambio de contraseña del usuario y límite de intentos de login.
+
+## 2026-09-27 — Cambio de contraseña desde la app (beta v1)
+
+**Decisión:** el usuario puede cambiar su propia contraseña (link "Cambiar contraseña" en el header, endpoint `POST /cambiar-contrasena`). Antes solo se podía cambiar tocando la base a mano.
+- Exige la contraseña actual: una sesión olvidada abierta en otra compu no alcanza para cambiarla.
+- Mínimo 8 caracteres y distinta de la actual (reglas simples a propósito; se pueden endurecer después).
+- Reusa `usuarios.token_version` (migración 006): al cambiarla se invalidan todas las sesiones anteriores y se devuelve un token nuevo, así quien la cambió sigue logueado. Sin migración nueva.
+
+**Correcciones encontradas al probarlo:**
+- El login quedaba trabado en "Ingresando..." si la API no respondía (sin señal, servidor caído): no había manejo de error de red. Ahora muestra un mensaje.
+- En celular, con el link nuevo, el header se apretaba y partía "FT-CodeNation" en dos líneas: ahora los links bajan a una segunda línea.
+
+**Ojo para desarrollo local:** `frontend/.env.local` (lo genera `vercel env pull`) apunta `VITE_API_URL` a **producción** y tiene prioridad sobre `.env`. Correr `npm run dev` tal cual le pega a la API real. Para probar contra el backend local, usar la config `frontend-vite-local-api` de `.claude/launch.json`, que fuerza `VITE_API_URL=http://localhost:8000`.
