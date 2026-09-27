@@ -159,3 +159,24 @@ Registro de decisiones importantes del proyecto y su justificación, para no per
 **Fuera de esta primera versión, a propósito:** escritura de datos por chat (v2), y cualquier acción fuera de consultar/cargar información del propio negocio (nada de administrar el sistema, usuarios, ni configuración desde el chat).
 
 **Pendiente antes de construir:** confirmar con Marco el modelo de costos (¿la API de Claude se paga con una cuenta de Marco, y ese costo entra en el abono de mantenimiento técnico que se está definiendo con el cliente?), y decidir dónde vive el chat en la interfaz.
+
+## 2026-09-27 — Trazabilidad de bidón por QR: diseño para la próxima actualización (NO construido todavía)
+
+**Pedido del usuario:** reunión de Marco con un ingeniero agrónomo (2026-09-27): poder escanear el QR de un bidón/envase y ver de dónde viene (origen: proveedor, fecha de compra) **y** dónde se usó (en qué lotes de campo, cuándo). No solo el origen — trazabilidad completa origen→uso.
+
+**Por qué esto es más grande que "agregar una pantalla":** hoy el stock de un insumo es un número agregado (`SUM` de todos los movimientos de ese insumo). No existe el concepto de "esta cantidad específica vino de esta compra puntual". Para trazar un bidón concreto hace falta separar el stock por **partida de compra** (ojo: se usa la palabra "partida", no "lote" — "lote" ya significa parcela de campo en este sistema, y mezclar los dos términos sería confuso).
+
+**Diseño propuesto:**
+- Tabla nueva `partidas`: una partida se crea automáticamente cada vez que se registra una ENTRADA (1 ENTRADA = 1 partida). Guarda `codigo` (lo que representa el QR — ver más abajo), `proveedor` (opcional), y queda ligada al `movimiento_insumo` de esa ENTRADA para no duplicar cantidad/fecha.
+- `movimientos_insumo` suma un `partida_id` opcional: al registrar un EGRESO, el usuario **escanea el QR del bidón que está usando**, y el sistema descuenta de esa partida puntual (no de un promedio automático tipo FIFO — más simple de implementar y coincide con el flujo real: "agarro este bidón, lo escaneo, cargo cuánto usé").
+- Pantalla/endpoint nuevo "Escanear QR": dado un código, muestra la partida (insumo, proveedor, fecha y cantidad de ingreso) y la lista de egresos que se hicieron desde esa partida puntual (fecha, lote de campo, cantidad) — ahí está la trazabilidad completa que pidió el ingeniero.
+- Todo opcional/aditivo: un tenant que no quiere usar esto puede seguir cargando movimientos sin partida, como hasta ahora.
+
+**Pendiente de investigar antes de poder dimensionar el trabajo real (Marco no lo sabe todavía):** si el QR **ya viene de fábrica** en el bidón (y en ese caso, si es único por bidón individual o se repite por lote de fabricación completo), o si **el sistema tiene que generar e imprimir su propio QR** al cargar cada ENTRADA. Esto cambia bastante el alcance:
+- Si ya viene de fábrica: el sistema solo necesita poder *leer* un QR (cámara del celular) y guardar ese código tal cual.
+- Si lo generamos nosotros: además hace falta generar la imagen del QR e imprimirlo/pegarlo en el bidón físicamente, y una librería de generación de QR (a evaluar cuál, sin sumar dependencias de más — regla 3 de CLAUDE.md).
+- En ambos casos hace falta una librería de **lectura** de QR desde la cámara del navegador (nueva dependencia de frontend, a definir cuál).
+
+**Tercera opción a investigar (idea de Marco, 2026-09-27):** en vez de depender de un QR físico en el bidón, el mayorista/distribuidor podría tener su propia API de rastreo de lote/partida -- si existe y el cliente puede acceder a ella, sería más confiable que leer una etiqueta física (no depende de que el bidón conserve el QR en buen estado). Hay que confirmar con el cliente si el mayorista real que usa ofrece algo así.
+
+**Siguiente paso concreto:** Marco tiene que averiguar con el cliente/ingeniero (a) cómo son los bidones reales que usan (¿traen QR o código de barras de fábrica? ¿es único por bidón?), y (b) si el mayorista/distribuidor tiene alguna API o sistema de rastreo de lote que se pueda integrar, antes de que esto se pueda dimensionar en serio.
