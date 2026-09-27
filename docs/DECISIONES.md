@@ -210,3 +210,12 @@ Registro de decisiones importantes del proyecto y su justificación, para no per
 - **Trabajo offline (zonas rurales sin señal):** preocupación legítima, pero resoluble con tecnología web (service worker + almacenamiento local del navegador) más adelante si hace falta — no requiere una app nativa. No es un requisito para la v1.
 
 **Hallazgo nuevo, separado de la trazabilidad de uso:** Ley 27.279 (CampoLimpio) obliga al productor a devolver el envase vacío dentro del año de la compra a un punto autorizado. Es un problema distinto (gestión de residuos, no trazabilidad de aplicación) — candidato a una funcionalidad futura simple ("recordatorio: este bidón vence su plazo de devolución el [fecha compra + 1 año]"), pero no se mezcla con el diseño de trazabilidad de uso ya registrado arriba.
+
+## 2026-09-27 — Alcance de la v1 (beta): todo lo construido hasta hoy
+
+**Decisión (Marco):** la primera versión beta que usa el cliente (Gino Biciuffa) es **el sistema completo tal como está al commit `a388767`**: Stock e Insumos (campos, lotes con mapa, insumos con marcas/categorías, movimientos), Combustible, Reportes (PDF/imprimir/WhatsApp), Simulador de compras y login real con JWT.
+
+**Qué implica:**
+- Durante la beta no se suman funcionalidades nuevas: el foco es **corregir errores** que reporte el cliente o que salgan de la auditoría.
+- Lo ya diseñado pero no construido (cultivo/campaña por lote, N° de lote SENASA, agente de IA) queda para la versión siguiente, después de cerrar la beta.
+- Puntos operativos a revisar en la auditoría (no son features nuevas del producto): separar al cliente del tenant de demo, backups automáticos de la base de producción, cambio de contraseña del usuario y límite de intentos de login.
