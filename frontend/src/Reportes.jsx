@@ -24,7 +24,7 @@ function Reportes() {
     <div className="mt-6 space-y-8">
       {error && (
         <p className="rounded-md bg-red-50 p-3 text-sm text-red-700">
-          No se pudo conectar con el backend: {error}
+          No se pudieron cargar los datos: {error}
         </p>
       )}
 

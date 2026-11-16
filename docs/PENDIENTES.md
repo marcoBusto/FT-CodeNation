@@ -1,6 +1,6 @@
 # Pendientes
 
-Última actualización: 2026-10-08. El detalle y la justificación de cada decisión está en [DECISIONES.md](DECISIONES.md); acá solo el estado y el orden.
+Última actualización: 2026-11-16. El detalle y la justificación de cada decisión está en [DECISIONES.md](DECISIONES.md); acá solo el estado y el orden.
 
 ## A. Durante la beta (operativos — no son funcionalidades nuevas)
 
@@ -8,7 +8,7 @@ Alcance de la beta definido el 2026-09-27: el sistema tal como está, sin sumar 
 
 | # | Pendiente | Por qué importa | Estado |
 |---|-----------|-----------------|--------|
-| 1 | Backup diario de la base de producción (`ops/backup_stock.sh` + cron) | Hoy no hay: si falla el servidor se pierde todo lo que cargue el cliente | En curso |
+| 1 | Backup diario de la base de producción (`ops/backup_stock.sh` + cron) | Protege contra errores de datos o borrados accidentales | Hecho (2026-11-16): cron diario 3:45 con el usuario de base `stock_backup` (solo lectura), 14 días de retención en `/home/bitnami/backups/db` |
 | 2 | Activar snapshots automáticos de Lightsail (consola de AWS) | El backup en el mismo servidor no protege si el servidor se pierde; el snapshot es la copia externa | Pendiente |
 | 3 | Separar al cliente (Gino) del tenant de demo | Hoy comparte tenant 1 con el usuario de Marco; sus datos deben quedar aislados | Pendiente |
 | 4 | Límite de intentos de login | Protección contra fuerza bruta | Pendiente |

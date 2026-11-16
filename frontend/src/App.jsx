@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { apiFetch, cerrarSesion, guardarSesion, obtenerToken, obtenerUsuario } from './api'
+import { useEffect, useState } from 'react'
+import { apiFetch, cerrarSesion, guardarSesion, obtenerToken, obtenerUsuario, EVENTO_SESION_VENCIDA } from './api'
 import Campos from './Campos'
 import Lotes from './Lotes'
 import Insumos from './Insumos'
@@ -12,9 +12,26 @@ import CambiarContrasena from './CambiarContrasena'
 function App() {
   const [usuario, setUsuario] = useState(obtenerUsuario())
   const [vista, setVista] = useState('insumos')
+  const [sesionVencida, setSesionVencida] = useState(false)
+
+  // api.js avisa cuando el servidor rechaza el token (venció o fue
+  // invalidado): se vuelve al login en vez de dejar las pantallas en error.
+  useEffect(() => {
+    const alVencer = () => {
+      setSesionVencida(true)
+      setUsuario(null)
+    }
+    window.addEventListener(EVENTO_SESION_VENCIDA, alVencer)
+    return () => window.removeEventListener(EVENTO_SESION_VENCIDA, alVencer)
+  }, [])
+
+  const ingresar = (usuarioNuevo) => {
+    setSesionVencida(false)
+    setUsuario(usuarioNuevo)
+  }
 
   if (!obtenerToken() || !usuario) {
-    return <Login onIngresar={setUsuario} />
+    return <Login onIngresar={ingresar} sesionVencida={sesionVencida} />
   }
 
   const salir = () => {
@@ -99,7 +116,7 @@ function Pestaña({ activa, onClick, children }) {
   )
 }
 
-function Login({ onIngresar }) {
+function Login({ onIngresar, sesionVencida }) {
   const [email, setEmail] = useState('')
   const [contrasena, setContrasena] = useState('')
   const [error, setError] = useState(null)
@@ -129,6 +146,11 @@ function Login({ onIngresar }) {
     <div className="mx-auto max-w-sm p-8">
       <h1 className="text-xl font-semibold text-brand-primary-dark">FT-CodeNation</h1>
       <p className="text-sm text-gray-700">Gestión de Stock e Insumos Agrícolas</p>
+      {sesionVencida && (
+        <p className="mt-4 rounded-md bg-amber-50 p-2 text-sm text-amber-800">
+          Tu sesión venció. Ingresá de nuevo para continuar.
+        </p>
+      )}
       <form onSubmit={ingresar} className="mt-4 space-y-3">
         <label className="block">
           <span className="text-sm text-gray-700">Email</span>

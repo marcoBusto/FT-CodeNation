@@ -28,32 +28,57 @@ export function guardarSesion(token, usuario) {
 // deje de servir para cualquiera que lo tenga, no solo en este navegador.
 // Si falla la llamada (sin conexión, etc.) igual se borra localmente: el
 // usuario no debe quedar trabado sin poder salir.
+function borrarSesionLocal() {
+  localStorage.removeItem('auth_token')
+  localStorage.removeItem('auth_usuario')
+}
+
 export function cerrarSesion() {
   return apiFetch('/logout', { method: 'POST' })
     .catch(() => {})
-    .finally(() => {
-      localStorage.removeItem('auth_token')
-      localStorage.removeItem('auth_usuario')
-    })
+    .finally(borrarSesionLocal)
+}
+
+// El backend responde 401 solo cuando el token falta, venció (7 días) o fue
+// invalidado por un logout. Sin esto la app quedaba "adentro" con un token
+// muerto y cada pantalla mostraba un error en vez de volver al login.
+// App.jsx escucha este evento para mostrar la pantalla de ingreso.
+export const EVENTO_SESION_VENCIDA = 'sesion-vencida'
+
+function avisarSiSesionVencida(res, tokenEnviado) {
+  if (res.status === 401 && tokenEnviado) {
+    borrarSesionLocal()
+    window.dispatchEvent(new Event(EVENTO_SESION_VENCIDA))
+  }
+  return res
+}
+
+// fetch solo rechaza cuando no hubo respuesta (sin señal, servidor caído):
+// se traduce el "Failed to fetch" del navegador a un mensaje entendible.
+function fetchConToken(ruta, opciones) {
+  const token = obtenerToken()
+  return fetch(`${API_URL}${ruta}`, {
+    ...opciones,
+    headers: { 'X-Auth-Token': token, ...opciones.headers },
+  }).then(
+    (res) => avisarSiSesionVencida(res, token),
+    () => {
+      throw new Error('No se pudo conectar con el servidor. Revisá la conexión e intentá de nuevo.')
+    },
+  )
 }
 
 export function apiFetch(ruta, opciones = {}) {
-  return fetch(`${API_URL}${ruta}`, {
+  return fetchConToken(ruta, {
     ...opciones,
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Auth-Token': obtenerToken(),
-      ...opciones.headers,
-    },
+    headers: { 'Content-Type': 'application/json', ...opciones.headers },
   }).then((res) => res.json())
 }
 
 // Para endpoints que devuelven un archivo (ej. los PDF de /reportes) en vez
 // de JSON: acá no hay contrato {data, error} que parsear.
 export function apiFetchBlob(ruta) {
-  return fetch(`${API_URL}${ruta}`, {
-    headers: { 'X-Auth-Token': obtenerToken() },
-  }).then((res) => {
+  return fetchConToken(ruta, {}).then((res) => {
     if (!res.ok) throw new Error('No se pudo generar el reporte.')
     return res.blob()
   })
