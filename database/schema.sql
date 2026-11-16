@@ -8,6 +8,8 @@
 SET FOREIGN_KEY_CHECKS = 0;
 
 DROP TABLE IF EXISTS movimientos_insumo;
+DROP TABLE IF EXISTS siembras;
+DROP TABLE IF EXISTS cultivos;
 DROP TABLE IF EXISTS insumos;
 DROP TABLE IF EXISTS marcas;
 DROP TABLE IF EXISTS categorias;
@@ -134,6 +136,38 @@ CREATE TABLE insumos (
     INDEX idx_insumos_categoria (categoria_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- CULTIVOS (catálogo de cultivos por tenant, ej. "Soja", "Maíz")
+CREATE TABLE cultivos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id INT NOT NULL,
+    nombre VARCHAR(100) NOT NULL,
+    creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id),
+    UNIQUE KEY uq_cultivos_tenant_nombre (tenant_id, nombre),
+    INDEX idx_cultivos_tenant (tenant_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- SIEMBRAS (qué cultivo tuvo cada lote en cada campaña). El cultivo no es una
+-- columna de lotes porque el mismo lote rota entre campañas y puede tener dos
+-- cultivos en la misma (trigo / soja de segunda): la unicidad es
+-- lote + cultivo + campaña. "En curso" = fecha_cosecha IS NULL.
+CREATE TABLE siembras (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id INT NOT NULL,
+    lote_id INT NOT NULL,
+    cultivo_id INT NOT NULL,
+    campania CHAR(7) NOT NULL COMMENT 'Formato AAAA/AA, ej. 2025/26',
+    fecha_siembra DATE NULL,
+    fecha_cosecha DATE NULL,
+    creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id),
+    FOREIGN KEY (lote_id) REFERENCES lotes(id),
+    FOREIGN KEY (cultivo_id) REFERENCES cultivos(id),
+    UNIQUE KEY uq_siembras_lote_cultivo_campania (lote_id, cultivo_id, campania),
+    INDEX idx_siembras_tenant (tenant_id),
+    INDEX idx_siembras_cultivo (cultivo_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- 6. MOVIMIENTOS DE INSUMO (Ledger Inmutable de Stock)
 -- Reglas validadas en el backend, no en la base de datos (portabilidad MySQL/MariaDB):
 --   - cantidad_total es siempre positiva en ENTRADA y EGRESO_LOTE; el signo lo
@@ -145,11 +179,14 @@ CREATE TABLE insumos (
 --   - dosis_por_ha solo aplica a EGRESO_LOTE (informativo, no recalcula
 --     cantidad_total).
 --   - un EGRESO_LOTE se rechaza si deja el stock del insumo en negativo.
+--   - siembra_id es opcional y solo aplica a EGRESO_LOTE; si se indica, la
+--     siembra tiene que ser del mismo lote que el movimiento.
 CREATE TABLE movimientos_insumo (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     tenant_id INT NOT NULL,
     insumo_id INT NOT NULL,
     lote_id INT NULL,
+    siembra_id INT NULL COMMENT 'Solo aplica cuando tipo = EGRESO_LOTE',
     usuario_id INT NOT NULL,
     tipo ENUM('ENTRADA', 'EGRESO_LOTE', 'AJUSTE') NOT NULL,
     dosis_por_ha DECIMAL(10, 3) NULL COMMENT 'Solo aplica cuando tipo = EGRESO_LOTE',
@@ -159,10 +196,12 @@ CREATE TABLE movimientos_insumo (
     FOREIGN KEY (tenant_id) REFERENCES tenants(id),
     FOREIGN KEY (insumo_id) REFERENCES insumos(id),
     FOREIGN KEY (lote_id) REFERENCES lotes(id),
+    FOREIGN KEY (siembra_id) REFERENCES siembras(id),
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
     INDEX idx_mov_insumo_tenant (tenant_id),
     INDEX idx_mov_insumo_insumo (insumo_id),
     INDEX idx_mov_insumo_lote (lote_id),
+    INDEX idx_mov_insumo_siembra (siembra_id),
     INDEX idx_mov_insumo_fecha (fecha_hora)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

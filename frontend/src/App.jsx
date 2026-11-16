@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { apiFetch, cerrarSesion, guardarSesion, obtenerToken, obtenerUsuario, EVENTO_SESION_VENCIDA } from './api'
 import Campos from './Campos'
 import Lotes from './Lotes'
+import Siembras from './Siembras'
 import Insumos from './Insumos'
 import Movimientos from './Movimientos'
 import Combustible from './Combustible'
@@ -64,6 +65,9 @@ function App() {
           <Pestaña activa={vista === 'lotes'} onClick={() => setVista('lotes')}>
             Lotes
           </Pestaña>
+          <Pestaña activa={vista === 'siembras'} onClick={() => setVista('siembras')}>
+            Siembras
+          </Pestaña>
           <Pestaña activa={vista === 'insumos'} onClick={() => setVista('insumos')}>
             Insumos y stock
           </Pestaña>
@@ -85,6 +89,7 @@ function App() {
       <main>
         {vista === 'campos' && <Campos />}
         {vista === 'lotes' && <Lotes />}
+        {vista === 'siembras' && <Siembras />}
         {vista === 'insumos' && <Insumos />}
         {vista === 'movimientos' && <Movimientos />}
         {vista === 'combustible' && <Combustible />}

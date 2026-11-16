@@ -20,7 +20,7 @@ abstract class DatabaseTestCase extends TestCase
             );
         }
 
-        foreach (['movimientos_insumo', 'insumos', 'marcas', 'categorias', 'estaciones_combustible', 'labores', 'lotes', 'campos', 'usuarios', 'tenants'] as $tabla) {
+        foreach (['movimientos_insumo', 'siembras', 'cultivos', 'insumos', 'marcas', 'categorias', 'estaciones_combustible', 'labores', 'lotes', 'campos', 'usuarios', 'tenants'] as $tabla) {
             $this->pdo->exec("DELETE FROM {$tabla}");
         }
     }
@@ -102,6 +102,30 @@ abstract class DatabaseTestCase extends TestCase
     {
         $stmt = $this->pdo->prepare('INSERT INTO categorias (tenant_id, nombre) VALUES (:tenant_id, :nombre)');
         $stmt->execute(['tenant_id' => $tenantId, 'nombre' => $nombre]);
+
+        return (int) $this->pdo->lastInsertId();
+    }
+
+    protected function crearCultivo(int $tenantId, string $nombre = 'Soja'): int
+    {
+        $stmt = $this->pdo->prepare('INSERT INTO cultivos (tenant_id, nombre) VALUES (:tenant_id, :nombre)');
+        $stmt->execute(['tenant_id' => $tenantId, 'nombre' => $nombre]);
+
+        return (int) $this->pdo->lastInsertId();
+    }
+
+    protected function crearSiembra(int $tenantId, int $loteId, int $cultivoId, string $campania = '2025/26'): int
+    {
+        $stmt = $this->pdo->prepare(
+            'INSERT INTO siembras (tenant_id, lote_id, cultivo_id, campania)
+             VALUES (:tenant_id, :lote_id, :cultivo_id, :campania)'
+        );
+        $stmt->execute([
+            'tenant_id' => $tenantId,
+            'lote_id' => $loteId,
+            'cultivo_id' => $cultivoId,
+            'campania' => $campania,
+        ]);
 
         return (int) $this->pdo->lastInsertId();
     }

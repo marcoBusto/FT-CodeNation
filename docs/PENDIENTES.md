@@ -2,9 +2,11 @@
 
 Última actualización: 2026-11-16. El detalle y la justificación de cada decisión está en [DECISIONES.md](DECISIONES.md); acá solo el estado y el orden.
 
-## A. Durante la beta (operativos — no son funcionalidades nuevas)
+## A. Operativos heredados de la beta (no son funcionalidades nuevas)
 
-Alcance de la beta definido el 2026-09-27: el sistema tal como está, sin sumar features; solo corregir errores y cerrar estos puntos.
+La etapa "solo correcciones" de la beta se cerró el 2026-11-16 al arrancar la fase 2; estos puntos siguen abiertos en paralelo.
+
+**Deploy pendiente:** el fix de sesión vencida (commit `a3542bc`) está en GitHub pero no en Vercel: falta `npx vercel login` en la PC de Marco.
 
 | # | Pendiente | Por qué importa | Estado |
 |---|-----------|-----------------|--------|
@@ -19,11 +21,11 @@ Alcance de la beta definido el 2026-09-27: el sistema tal como está, sin sumar 
 | 9 | Plan comercial: cerrar entrega inicial y mantenimiento, y dejar por escrito con el vendedor que el mantenimiento es 100% de Marco | Se discutió sin cerrar | Pausado |
 | 10 | 20 casos de QA que requieren a una persona (WhatsApp desde celular real, diálogo de impresión, sesión vencida a los 7 días) | No automatizables | Pendiente |
 
-## B. Próxima versión (después de cerrar la beta) — orden sugerido
+## B. Fase 2 (iniciada el 2026-11-16) — orden sugerido
 
 | # | Funcionalidad | Estado del diseño | Notas |
 |---|---------------|-------------------|-------|
-| 1 | Cultivo / campaña por lote (`cultivos`, `siembras`, `siembra_id` opcional en movimientos) | Diseñado | Fue lo que más pidieron los agrónomos; habilita comparar gastos por campaña |
+| 1 | Cultivo / campaña por lote (`cultivos`, `siembras`, `siembra_id` opcional en movimientos) | Construido y probado en local (2026-11-16); falta deploy | Requiere aplicar la migración 007 en producción antes de subir el backend |
 | 2 | N.º de lote SENASA en cada ENTRADA + link a la página pública de AgroTraza | Diseñado | Versión chica de la trazabilidad por bidón; sin QR propio ni app nativa |
 | 3 | Costos por insumo y por campaña, y reportes por campaña | Sin diseñar | Depende de 1 |
 | 4 | Agente de IA, v1 solo lectura | Diseñado | Falta definir quién paga el uso de la API y dónde vive el chat |

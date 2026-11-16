@@ -4,8 +4,8 @@ class MovimientoInsumoController
 {
     private const TIPOS_VALIDOS = ['ENTRADA', 'EGRESO_LOTE', 'AJUSTE'];
 
-    // Filtros opcionales por insumo y/o lote, siempre acotado al tenant.
-    public static function listar(int $tenantId, ?int $insumoId = null, ?int $loteId = null): array
+    // Filtros opcionales por insumo, lote y/o siembra, siempre acotado al tenant.
+    public static function listar(int $tenantId, ?int $insumoId = null, ?int $loteId = null, ?int $siembraId = null): array
     {
         $condiciones = ['m.tenant_id = :tenant_id'];
         $parametros = ['tenant_id' => $tenantId];
@@ -18,6 +18,10 @@ class MovimientoInsumoController
             $condiciones[] = 'm.lote_id = :lote_id';
             $parametros['lote_id'] = $loteId;
         }
+        if ($siembraId !== null) {
+            $condiciones[] = 'm.siembra_id = :siembra_id';
+            $parametros['siembra_id'] = $siembraId;
+        }
 
         $pdo = Database::getConnection();
         $stmt = $pdo->prepare(
@@ -25,10 +29,13 @@ class MovimientoInsumoController
                 m.id, m.tipo, m.cantidad_total, m.dosis_por_ha, m.observacion, m.fecha_hora,
                 i.nombre AS insumo_nombre, i.unidad_medida,
                 l.nombre AS lote_nombre,
+                m.siembra_id, s.campania, cu.nombre AS cultivo_nombre,
                 u.nombre AS usuario_nombre
              FROM movimientos_insumo m
              INNER JOIN insumos i ON i.id = m.insumo_id
              LEFT JOIN lotes l ON l.id = m.lote_id
+             LEFT JOIN siembras s ON s.id = m.siembra_id
+             LEFT JOIN cultivos cu ON cu.id = s.cultivo_id
              INNER JOIN usuarios u ON u.id = m.usuario_id
              WHERE ' . implode(' AND ', $condiciones) . '
              ORDER BY m.fecha_hora DESC, m.id DESC'
@@ -71,13 +78,14 @@ class MovimientoInsumoController
 
             $stmt = $pdo->prepare(
                 'INSERT INTO movimientos_insumo
-                    (tenant_id, insumo_id, lote_id, usuario_id, tipo, dosis_por_ha, cantidad_total, observacion)
-                 VALUES (:tenant_id, :insumo_id, :lote_id, :usuario_id, :tipo, :dosis_por_ha, :cantidad_total, :observacion)'
+                    (tenant_id, insumo_id, lote_id, siembra_id, usuario_id, tipo, dosis_por_ha, cantidad_total, observacion)
+                 VALUES (:tenant_id, :insumo_id, :lote_id, :siembra_id, :usuario_id, :tipo, :dosis_por_ha, :cantidad_total, :observacion)'
             );
             $stmt->execute([
                 'tenant_id' => $tenantId,
                 'insumo_id' => $insumoId,
                 'lote_id' => ($datos['lote_id'] ?? '') !== '' ? (int) $datos['lote_id'] : null,
+                'siembra_id' => ($datos['siembra_id'] ?? '') !== '' ? (int) $datos['siembra_id'] : null,
                 'usuario_id' => $usuarioId,
                 'tipo' => $tipo,
                 'dosis_por_ha' => ($datos['dosis_por_ha'] ?? '') !== '' ? (float) $datos['dosis_por_ha'] : null,
@@ -146,6 +154,27 @@ class MovimientoInsumoController
                 $stmt->execute(['id' => $loteId, 'tenant_id' => $tenantId]);
                 if (!$stmt->fetchColumn()) {
                     $errores[] = 'El lote indicado no existe.';
+                }
+            }
+        }
+
+        // La siembra (cultivo + campaña) es opcional. Si viene, tiene que ser
+        // del mismo lote: imputar un egreso del lote A a una siembra del lote
+        // B falsearía los totales por campaña.
+        $siembraId = $datos['siembra_id'] ?? '';
+        if ($siembraId !== '') {
+            if ($tipo !== 'EGRESO_LOTE') {
+                $errores[] = 'La siembra solo aplica a un egreso a lote.';
+            } elseif (!ctype_digit((string) $siembraId)) {
+                $errores[] = 'La siembra indicada no es válida.';
+            } else {
+                $stmt = $pdo->prepare('SELECT lote_id FROM siembras WHERE id = :id AND tenant_id = :tenant_id');
+                $stmt->execute(['id' => $siembraId, 'tenant_id' => $tenantId]);
+                $loteDeLaSiembra = $stmt->fetchColumn();
+                if ($loteDeLaSiembra === false) {
+                    $errores[] = 'La siembra indicada no existe.';
+                } elseif ((string) $loteDeLaSiembra !== (string) $loteId) {
+                    $errores[] = 'La siembra indicada no corresponde al lote del movimiento.';
                 }
             }
         }

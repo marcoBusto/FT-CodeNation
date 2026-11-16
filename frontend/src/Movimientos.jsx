@@ -5,6 +5,7 @@ const MOVIMIENTO_VACIO = {
   tipo: 'ENTRADA',
   insumo_id: '',
   lote_id: '',
+  siembra_id: '',
   dosis_por_ha: '',
   cantidad_total: '',
   observacion: '',
@@ -14,6 +15,7 @@ function Movimientos() {
   const [movimientos, setMovimientos] = useState([])
   const [insumos, setInsumos] = useState([])
   const [lotes, setLotes] = useState([])
+  const [siembras, setSiembras] = useState([])
   const [movimiento, setMovimiento] = useState(MOVIMIENTO_VACIO)
   const [errores, setErrores] = useState([])
   const [error, setError] = useState(null)
@@ -31,6 +33,7 @@ function Movimientos() {
     cargarMovimientos()
     apiFetch('/insumos').then((res) => setInsumos(res.data ?? []))
     apiFetch('/lotes').then((res) => setLotes(res.data ?? []))
+    apiFetch('/siembras').then((res) => setSiembras(res.data ?? []))
   }, [])
 
   const actualizarMovimiento = (campo) => (evento) => {
@@ -55,6 +58,18 @@ function Movimientos() {
         cargarMovimientos()
       }
     })
+  }
+
+  // /siembras ya viene ordenado con las en curso primero y la más reciente
+  // arriba (ver SiembraController::listar).
+  const siembrasDelLote = siembras.filter((s) => String(s.lote_id) === String(movimiento.lote_id))
+
+  // Al elegir lote se sugiere su siembra en curso (sin fecha de cosecha); el
+  // usuario puede cambiarla o dejar el egreso sin siembra.
+  const cambiarLote = (evento) => {
+    const loteId = evento.target.value
+    const enCurso = siembras.find((s) => String(s.lote_id) === loteId && !s.fecha_cosecha)
+    setMovimiento({ ...movimiento, lote_id: loteId, siembra_id: enCurso ? String(enCurso.id) : '' })
   }
 
   const esEgresoLote = movimiento.tipo === 'EGRESO_LOTE'
@@ -99,19 +114,37 @@ function Movimientos() {
         </div>
 
         {esEgresoLote && (
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <label className="block">
               <span className="text-sm text-gray-700">Lote</span>
-              <select
-                required
-                value={movimiento.lote_id}
-                onChange={actualizarMovimiento('lote_id')}
-                className="campo mt-1"
-              >
+              <select required value={movimiento.lote_id} onChange={cambiarLote} className="campo mt-1">
                 <option value="">Elegir...</option>
                 {lotes.map((l) => (
                   <option key={l.id} value={l.id}>
                     {l.nombre} ({l.campo_nombre}, {l.hectareas} ha)
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="block">
+              <span className="text-sm text-gray-700">Cultivo / campaña (opcional)</span>
+              <select
+                value={movimiento.siembra_id}
+                onChange={actualizarMovimiento('siembra_id')}
+                disabled={siembrasDelLote.length === 0}
+                className="campo mt-1 disabled:bg-gray-100"
+              >
+                <option value="">
+                  {!movimiento.lote_id
+                    ? 'Elegí primero el lote'
+                    : siembrasDelLote.length === 0
+                      ? 'El lote no tiene siembras cargadas'
+                      : 'Sin indicar'}
+                </option>
+                {siembrasDelLote.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.cultivo_nombre} · {s.campania}
+                    {s.fecha_cosecha ? ' (cosechada)' : ''}
                   </option>
                 ))}
               </select>
@@ -181,6 +214,7 @@ function Movimientos() {
             <div className="mt-1 text-gray-700">
               {m.insumo_nombre}
               {m.lote_nombre && ` · ${m.lote_nombre}`}
+              {m.cultivo_nombre && ` · ${m.cultivo_nombre} ${m.campania}`}
               {m.dosis_por_ha && ` · ${m.dosis_por_ha}/ha`}
               {' · '}
               {m.usuario_nombre} · {m.fecha_hora}

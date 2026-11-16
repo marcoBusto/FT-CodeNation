@@ -16,6 +16,8 @@ require __DIR__ . '/../src/Controllers/LoteController.php';
 require __DIR__ . '/../src/Controllers/InsumoController.php';
 require __DIR__ . '/../src/Controllers/MarcaController.php';
 require __DIR__ . '/../src/Controllers/CategoriaController.php';
+require __DIR__ . '/../src/Controllers/CultivoController.php';
+require __DIR__ . '/../src/Controllers/SiembraController.php';
 require __DIR__ . '/../src/Controllers/MovimientoInsumoController.php';
 require __DIR__ . '/../src/Controllers/LaborController.php';
 require __DIR__ . '/../src/Controllers/EstacionCombustibleController.php';
@@ -241,8 +243,53 @@ try {
         return;
     }
 
+    if ($ruta === '/cultivos' && $metodo === 'GET') {
+        responder(CultivoController::listar($tenantId));
+        return;
+    }
+
+    if ($ruta === '/cultivos' && $metodo === 'POST') {
+        responderResultado(CultivoController::crear($tenantId, $cuerpo()), 201);
+        return;
+    }
+
+    if (($id = $idDeRuta('cultivos')) !== null && $metodo === 'PUT') {
+        responderResultado(CultivoController::editar($tenantId, $id, $cuerpo()));
+        return;
+    }
+
+    if (($id = $idDeRuta('cultivos')) !== null && $metodo === 'DELETE') {
+        responderResultado(CultivoController::eliminar($tenantId, $id));
+        return;
+    }
+
+    if ($ruta === '/siembras' && $metodo === 'GET') {
+        responder(SiembraController::listar($tenantId, $query('lote_id')));
+        return;
+    }
+
+    if ($ruta === '/siembras' && $metodo === 'POST') {
+        responderResultado(SiembraController::crear($tenantId, $cuerpo()), 201);
+        return;
+    }
+
+    if (($id = $idDeRuta('siembras')) !== null && $metodo === 'PUT') {
+        responderResultado(SiembraController::editar($tenantId, $id, $cuerpo()));
+        return;
+    }
+
+    if (($id = $idDeRuta('siembras')) !== null && $metodo === 'DELETE') {
+        responderResultado(SiembraController::eliminar($tenantId, $id));
+        return;
+    }
+
     if ($ruta === '/movimientos' && $metodo === 'GET') {
-        responder(MovimientoInsumoController::listar($tenantId, $query('insumo_id'), $query('lote_id')));
+        responder(MovimientoInsumoController::listar(
+            $tenantId,
+            $query('insumo_id'),
+            $query('lote_id'),
+            $query('siembra_id')
+        ));
         return;
     }
 

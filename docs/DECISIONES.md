@@ -232,3 +232,31 @@ Registro de decisiones importantes del proyecto y su justificación, para no per
 - En celular, con el link nuevo, el header se apretaba y partía "FT-CodeNation" en dos líneas: ahora los links bajan a una segunda línea.
 
 **Ojo para desarrollo local:** `frontend/.env.local` (lo genera `vercel env pull`) apunta `VITE_API_URL` a **producción** y tiene prioridad sobre `.env`. Correr `npm run dev` tal cual le pega a la API real. Para probar contra el backend local, usar la config `frontend-vite-local-api` de `.claude/launch.json`, que fuerza `VITE_API_URL=http://localhost:8000`.
+
+## 2026-11-16 — Fin de la beta e inicio de la fase 2: cultivo / campaña por lote
+
+**Decisión (Marco):** se cierra la etapa "solo correcciones" de la beta v1 y arranca la fase 2. Los pendientes operativos de la beta que siguen abiertos (snapshots de Lightsail, rotar credenciales, separar al cliente del tenant de demo, límite de intentos de login) continúan en paralelo; ver [PENDIENTES.md](PENDIENTES.md).
+
+**Primera funcionalidad: cultivo / campaña por lote.** Fue lo que más pidieron los ingenieros agrónomos: sin saber qué cultivo tuvo cada lote en cada campaña no se pueden agrupar ni comparar los gastos de insumos.
+
+**Modelo de datos (migración `007_cultivos_siembras.sql`, 100% aditiva):**
+- `cultivos`: catálogo por tenant, mismo patrón que `marcas`/`categorias`. La migración precarga ocho cultivos de la zona pampeana como referencia editable.
+- `siembras`: `lote_id` + `cultivo_id` + `campania` ("2025/26") + `fecha_siembra`/`fecha_cosecha` opcionales. El cultivo **no** es una columna de `lotes` porque el mismo lote rota de cultivo entre campañas.
+- `movimientos_insumo.siembra_id`: opcional (NULL).
+
+**Reglas de negocio confirmadas con Marco:**
+- **Doble cultivo permitido:** un lote puede tener dos cultivos en la misma campaña (trigo y soja de segunda). La unicidad es lote + cultivo + campaña.
+- **Siembra sugerida, no obligatoria, en los egresos:** al elegir el lote se preselecciona su siembra en curso (la que no tiene fecha de cosecha); el usuario puede cambiarla o dejarla vacía.
+
+**Criterios aplicados (no consultados, por seguir lo ya decidido en el proyecto):**
+- "En curso" = sin fecha de cosecha. No se agregó una columna de estado aparte.
+- Los movimientos anteriores quedan sin siembra: el ledger es inmutable y no se reescribe.
+- La siembra de un egreso tiene que ser del mismo lote que el movimiento, y solo aplica a `EGRESO_LOTE`.
+- Una siembra con movimientos imputados no se puede eliminar ni cambiar de lote (sí se le pueden corregir cultivo, campaña y fechas). Un cultivo usado por alguna siembra no se puede eliminar.
+- La campaña se valida con formato `AAAA/AA` y años consecutivos. La pantalla ofrece de la próxima campaña a cuatro hacia atrás, tomando julio como inicio de campaña.
+
+**Alternativa descartada:** guardar el cultivo como texto libre en el lote o en cada movimiento. Es más rápido, pero no permite historia por campaña y genera nombres inconsistentes ("soja", "Soja 1ra") que rompen cualquier agrupación posterior.
+
+**Qué habilita:** costos y reportes por cultivo y campaña (siguiente paso de la fase 2), filtrando `GET /movimientos?siembra_id=`.
+
+**Deploy:** requiere aplicar la migración 007 en la base de producción **antes** de subir el backend nuevo (el backend nuevo consulta la columna `siembra_id`).

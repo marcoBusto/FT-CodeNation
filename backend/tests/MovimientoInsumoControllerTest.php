@@ -184,4 +184,80 @@ final class MovimientoInsumoControllerTest extends DatabaseTestCase
 
         $this->assertArrayHasKey('errores', $resultado);
     }
+
+    public function testEgresoPuedeImputarseAUnaSiembraDelMismoLote(): void
+    {
+        $tenantId = $this->crearTenant();
+        $usuarioId = $this->crearUsuario($tenantId);
+        $insumoId = $this->crearInsumo($tenantId);
+        $loteId = $this->crearLote($tenantId, $this->crearCampo($tenantId));
+        $siembraId = $this->crearSiembra($tenantId, $loteId, $this->crearCultivo($tenantId, 'Soja'), '2025/26');
+        MovimientoInsumoController::registrar($tenantId, $usuarioId, [
+            'tipo' => 'ENTRADA', 'insumo_id' => $insumoId, 'cantidad_total' => 100,
+        ]);
+
+        $resultado = MovimientoInsumoController::registrar($tenantId, $usuarioId, [
+            'tipo' => 'EGRESO_LOTE', 'insumo_id' => $insumoId, 'lote_id' => $loteId,
+            'siembra_id' => $siembraId, 'cantidad_total' => 40,
+        ]);
+
+        $this->assertArrayHasKey('id', $resultado);
+        $deLaSiembra = MovimientoInsumoController::listar($tenantId, null, null, $siembraId);
+        $this->assertCount(1, $deLaSiembra);
+        $this->assertSame('Soja', $deLaSiembra[0]['cultivo_nombre']);
+        $this->assertSame('2025/26', $deLaSiembra[0]['campania']);
+    }
+
+    public function testLaSiembraEsOpcionalEnUnEgreso(): void
+    {
+        $tenantId = $this->crearTenant();
+        $usuarioId = $this->crearUsuario($tenantId);
+        $insumoId = $this->crearInsumo($tenantId);
+        $loteId = $this->crearLote($tenantId, $this->crearCampo($tenantId));
+        MovimientoInsumoController::registrar($tenantId, $usuarioId, [
+            'tipo' => 'ENTRADA', 'insumo_id' => $insumoId, 'cantidad_total' => 100,
+        ]);
+
+        $resultado = MovimientoInsumoController::registrar($tenantId, $usuarioId, [
+            'tipo' => 'EGRESO_LOTE', 'insumo_id' => $insumoId, 'lote_id' => $loteId,
+            'siembra_id' => '', 'cantidad_total' => 40,
+        ]);
+
+        $this->assertArrayHasKey('id', $resultado);
+        $this->assertNull(MovimientoInsumoController::listar($tenantId, null, $loteId)[0]['cultivo_nombre']);
+    }
+
+    public function testRechazaSiembraDeOtroLoteDeOtroTenantOEnUnaEntrada(): void
+    {
+        $tenantId = $this->crearTenant();
+        $usuarioId = $this->crearUsuario($tenantId);
+        $insumoId = $this->crearInsumo($tenantId);
+        $campoId = $this->crearCampo($tenantId);
+        $loteId = $this->crearLote($tenantId, $campoId, 10.0, 'Lote 1');
+        $otroLoteId = $this->crearLote($tenantId, $campoId, 10.0, 'Lote 2');
+        $cultivoId = $this->crearCultivo($tenantId, 'Soja');
+        $siembraDeOtroLote = $this->crearSiembra($tenantId, $otroLoteId, $cultivoId);
+        $siembraPropia = $this->crearSiembra($tenantId, $loteId, $cultivoId);
+        $otroTenant = $this->crearTenant('Otro');
+        $siembraAjena = $this->crearSiembra(
+            $otroTenant,
+            $this->crearLote($otroTenant, $this->crearCampo($otroTenant)),
+            $this->crearCultivo($otroTenant, 'Maíz')
+        );
+        MovimientoInsumoController::registrar($tenantId, $usuarioId, [
+            'tipo' => 'ENTRADA', 'insumo_id' => $insumoId, 'cantidad_total' => 100,
+        ]);
+        $egreso = ['tipo' => 'EGRESO_LOTE', 'insumo_id' => $insumoId, 'lote_id' => $loteId, 'cantidad_total' => 10];
+
+        $otroLote = MovimientoInsumoController::registrar($tenantId, $usuarioId, $egreso + ['siembra_id' => $siembraDeOtroLote]);
+        $ajena = MovimientoInsumoController::registrar($tenantId, $usuarioId, $egreso + ['siembra_id' => $siembraAjena]);
+        $enEntrada = MovimientoInsumoController::registrar($tenantId, $usuarioId, [
+            'tipo' => 'ENTRADA', 'insumo_id' => $insumoId, 'cantidad_total' => 10, 'siembra_id' => $siembraPropia,
+        ]);
+
+        $this->assertArrayHasKey('errores', $otroLote);
+        $this->assertArrayHasKey('errores', $ajena);
+        $this->assertArrayHasKey('errores', $enEntrada);
+        $this->assertSame(100.0, (float) InsumoController::stock($tenantId)[0]['stock_actual']);
+    }
 }
