@@ -98,7 +98,7 @@ class ReporteController
     private static function estilos(): string
     {
         return 'body { font-family: sans-serif; color: #1f2937; }'
-            . 'h1 { color: #1f4b33; } h2 { color: #1f4b33; margin-top: 20px; }'
+            . 'h1 { color: #6b00c7; } h2 { color: #6b00c7; margin-top: 20px; }'
             . 'table { width: 100%; border-collapse: collapse; margin-top: 8px; }'
             . 'th, td { border: 1px solid #d1d5db; padding: 6px 8px; text-align: left; font-size: 12px; }'
             . 'th { background: #f3f4f6; }'

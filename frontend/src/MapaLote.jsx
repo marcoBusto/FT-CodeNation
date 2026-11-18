@@ -113,7 +113,7 @@ function MapaLote({ onPoligonoCompleto }) {
             type="button"
             onClick={finalizarPoligono}
             disabled={cantidadPuntos < 3}
-            className="mt-2 rounded-md bg-brand-primary px-3 py-1 text-xs text-white disabled:opacity-40"
+            className="mt-2 rounded-md bg-brand-yellow px-3 py-1 text-xs text-brand-ink disabled:opacity-40"
           >
             Terminar polígono
           </button>
@@ -122,9 +122,9 @@ function MapaLote({ onPoligonoCompleto }) {
 
       {metricas && (
         <div className="absolute right-3 top-3 rounded-md bg-white/95 p-3 shadow-md">
-          <p className="text-sm font-semibold text-brand-primary-dark">{metricas.areaHectareas} ha</p>
+          <p className="text-sm font-semibold text-brand-purple-dark">{metricas.areaHectareas} ha</p>
           <p className="text-xs text-gray-700">Perímetro: {metricas.perimetroMetros} m</p>
-          <button type="button" onClick={redibujar} className="mt-2 text-xs text-brand-primary underline">
+          <button type="button" onClick={redibujar} className="mt-2 text-xs text-brand-purple-dark underline">
             Redibujar
           </button>
         </div>

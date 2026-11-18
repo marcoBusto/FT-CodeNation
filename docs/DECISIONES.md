@@ -260,3 +260,15 @@ Registro de decisiones importantes del proyecto y su justificación, para no per
 **Qué habilita:** costos y reportes por cultivo y campaña (siguiente paso de la fase 2), filtrando `GET /movimientos?siembra_id=`.
 
 **Deploy:** requiere aplicar la migración 007 en la base de producción **antes** de subir el backend nuevo (el backend nuevo consulta la columna `siembra_id`).
+
+## 2026-11-18 — Identidad visual: la misma de CodeNation / SisCom
+
+**Decisión (Marco):** stock pasa a usar la identidad de SisCom en todo: azul marino en barra y login, amarillo en botones principales, violeta en acentos, fuentes Poppins y Bebas Neue, y el símbolo de Code Nation como logo e ícono de pestaña. Los dos sistemas quedan como una sola marca.
+
+**Qué reemplaza:** la paleta verde inglés / dorado de la beta, que según el comentario de `index.css` venía del sitio institucional del cliente (Cabaña María Lucía de Ferrero).
+
+**Cómo:** los colores y fuentes siguen definidos en un único lugar (`frontend/src/index.css`, con los mismos nombres de tokens que SisCom). Barra, login y pie salen de `Marca.jsx` y `LogoSimbolo.jsx`, copiados de SisCom; si cambia el logo, hay que cambiarlo en los dos proyectos. Los títulos del PDF de reportes también pasan a violeta.
+
+**Dependencias nuevas:** `@fontsource/poppins` y `@fontsource/bebas-neue`, las mismas que SisCom. Guardan las fuentes dentro de la app en vez de pedirlas a Google, lo que importa con mala señal en el campo.
+
+**Alternativa descartada:** mantener el verde como acento propio de stock.

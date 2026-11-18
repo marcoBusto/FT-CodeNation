@@ -66,7 +66,7 @@ function Calculadora({ labores, estaciones, lotes }) {
 
   return (
     <form onSubmit={calcular} className="space-y-3 rounded-md border border-gray-300 p-4">
-      <h2 className="text-sm font-medium text-brand-primary-dark">Calculador estimativo de combustible</h2>
+      <h2 className="text-sm font-medium text-brand-purple-dark">Calculador estimativo de combustible</h2>
       <p className="text-xs text-gray-600">
         Estimación rápida (litros y costo) en base a las hectáreas del lote — no queda guardada como historial.
       </p>
@@ -123,14 +123,14 @@ function Calculadora({ labores, estaciones, lotes }) {
 
       <button
         type="submit"
-        className="rounded-md bg-brand-primary px-4 py-2 text-sm font-medium text-white hover:bg-brand-primary-dark"
+        className="rounded-md bg-brand-yellow px-4 py-2 text-sm font-medium text-brand-ink hover:bg-brand-yellow-dark"
       >
         Calcular
       </button>
 
       {resultado && (
-        <div className="rounded-md bg-brand-primary/10 p-3 text-sm">
-          <p className="font-medium text-brand-primary-dark">
+        <div className="rounded-md bg-brand-purple/10 p-3 text-sm">
+          <p className="font-medium text-brand-purple-dark">
             {resultado.litros_estimados} litros estimados · ${resultado.costo_estimado}
           </p>
           <p className="text-xs text-gray-700">
@@ -180,7 +180,7 @@ function CatalogoLabores({ labores, onCambio }) {
 
   return (
     <div className="space-y-3 rounded-md border border-gray-300 p-4">
-      <h2 className="text-sm font-medium text-brand-primary-dark">Labores y consumo estimado</h2>
+      <h2 className="text-sm font-medium text-brand-purple-dark">Labores y consumo estimado</h2>
 
       <form onSubmit={crear} className="flex flex-wrap items-end gap-3">
         <label className="block">
@@ -206,7 +206,7 @@ function CatalogoLabores({ labores, onCambio }) {
             className="campo mt-1 w-28"
           />
         </label>
-        <button type="submit" className="rounded-md bg-brand-primary px-3 py-2 text-xs text-white">
+        <button type="submit" className="rounded-md bg-brand-yellow px-3 py-2 text-xs text-brand-ink">
           Agregar
         </button>
       </form>
@@ -237,7 +237,7 @@ function CatalogoLabores({ labores, onCambio }) {
                 onChange={(e) => setEnEdicion({ ...enEdicion, litros_por_hectarea: e.target.value })}
                 className="campo w-24"
               />
-              <button type="button" onClick={() => guardar(l.id)} className="rounded-md bg-brand-primary px-3 py-1 text-xs text-white">
+              <button type="button" onClick={() => guardar(l.id)} className="rounded-md bg-brand-yellow px-3 py-1 text-xs text-brand-ink">
                 Guardar
               </button>
               <button type="button" onClick={() => setEditandoId(null)} className="text-xs text-gray-700 underline">
@@ -255,7 +255,7 @@ function CatalogoLabores({ labores, onCambio }) {
                     setEditandoId(l.id)
                     setEnEdicion({ nombre: l.nombre, litros_por_hectarea: l.litros_por_hectarea })
                   }}
-                  className="text-xs text-brand-primary underline"
+                  className="text-xs text-brand-purple-dark underline"
                 >
                   Editar
                 </button>
@@ -309,7 +309,7 @@ function CatalogoEstaciones({ estaciones, onCambio }) {
 
   return (
     <div className="space-y-3 rounded-md border border-gray-300 p-4">
-      <h2 className="text-sm font-medium text-brand-primary-dark">Estaciones y precio por litro</h2>
+      <h2 className="text-sm font-medium text-brand-purple-dark">Estaciones y precio por litro</h2>
       <p className="text-xs text-gray-600">
         El precio se carga a mano y hay que actualizarlo cuando cambia — no existe una fuente online gratuita y
         confiable por surtidor.
@@ -339,7 +339,7 @@ function CatalogoEstaciones({ estaciones, onCambio }) {
             className="campo mt-1 w-28"
           />
         </label>
-        <button type="submit" className="rounded-md bg-brand-primary px-3 py-2 text-xs text-white">
+        <button type="submit" className="rounded-md bg-brand-yellow px-3 py-2 text-xs text-brand-ink">
           Agregar
         </button>
       </form>
@@ -370,7 +370,7 @@ function CatalogoEstaciones({ estaciones, onCambio }) {
                 onChange={(ev) => setEnEdicion({ ...enEdicion, precio_por_litro: ev.target.value })}
                 className="campo w-24"
               />
-              <button type="button" onClick={() => guardar(e.id)} className="rounded-md bg-brand-primary px-3 py-1 text-xs text-white">
+              <button type="button" onClick={() => guardar(e.id)} className="rounded-md bg-brand-yellow px-3 py-1 text-xs text-brand-ink">
                 Guardar
               </button>
               <button type="button" onClick={() => setEditandoId(null)} className="text-xs text-gray-700 underline">
@@ -390,7 +390,7 @@ function CatalogoEstaciones({ estaciones, onCambio }) {
                     setEditandoId(e.id)
                     setEnEdicion({ nombre: e.nombre, precio_por_litro: e.precio_por_litro })
                   }}
-                  className="text-xs text-brand-primary underline"
+                  className="text-xs text-brand-purple-dark underline"
                 >
                   Editar
                 </button>

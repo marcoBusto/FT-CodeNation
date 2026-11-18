@@ -9,6 +9,7 @@ import Combustible from './Combustible'
 import Reportes from './Reportes'
 import SimuladorCompras from './SimuladorCompras'
 import CambiarContrasena from './CambiarContrasena'
+import { Marca, PieDeMarca } from './Marca'
 
 function App() {
   const [usuario, setUsuario] = useState(obtenerUsuario())
@@ -41,24 +42,25 @@ function App() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl p-8">
-      <header>
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div>
-            <h1 className="text-2xl font-semibold text-brand-primary-dark">FT-CodeNation</h1>
-            <p className="text-sm text-gray-700">Gestión de Stock e Insumos Agrícolas</p>
-          </div>
-          <div className="flex items-center gap-3 text-xs text-gray-700">
-            <span>{usuario.nombre}</span>
-            <button onClick={() => setVista('cuenta')} className="text-gray-600 underline hover:text-gray-600">
+    <div className="flex min-h-screen flex-col">
+      <header className="bg-brand-navy text-white">
+        <div className="mx-auto max-w-4xl px-4 pt-4 sm:px-8">
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+          <Marca />
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+            <span className="text-gray-200">{usuario.nombre}</span>
+            <button onClick={() => setVista('cuenta')} className="text-gray-400 hover:text-white hover:underline">
               Cambiar contraseña
             </button>
-            <button onClick={salir} className="text-gray-600 underline hover:text-gray-600">
+            <button
+              onClick={salir}
+              className="rounded-full border border-brand-yellow px-3 py-1 text-xs font-semibold text-brand-yellow hover:bg-brand-yellow hover:text-brand-ink"
+            >
               Cerrar sesión
             </button>
           </div>
         </div>
-        <nav className="mt-4 flex flex-wrap gap-2 border-b border-gray-300">
+        <nav className="mt-4 flex flex-wrap gap-1">
           <Pestaña activa={vista === 'campos'} onClick={() => setVista('campos')}>
             Campos
           </Pestaña>
@@ -84,9 +86,10 @@ function App() {
             Simulador de compras
           </Pestaña>
         </nav>
+        </div>
       </header>
 
-      <main>
+      <main className="mx-auto w-full max-w-4xl flex-1 p-4 sm:p-8">
         {vista === 'campos' && <Campos />}
         {vista === 'lotes' && <Lotes />}
         {vista === 'siembras' && <Siembras />}
@@ -98,10 +101,7 @@ function App() {
         {vista === 'cuenta' && <CambiarContrasena />}
       </main>
 
-      <footer className="mt-12 flex items-center gap-2 rounded-md bg-black px-4 py-3 text-xs text-white">
-        <img src="/codenation-logo.webp" alt="CodeNation" className="h-4 w-auto" />
-        <span>Powered by CodeNation-SC — © {new Date().getFullYear()}</span>
-      </footer>
+      <PieDeMarca className="border-t border-gray-200" />
     </div>
   )
 }
@@ -110,10 +110,10 @@ function Pestaña({ activa, onClick, children }) {
   return (
     <button
       onClick={onClick}
-      className={`-mb-px border-b-2 px-3 py-2 text-sm font-medium ${
+      className={`border-b-4 px-3 py-2 text-sm font-medium ${
         activa
-          ? 'border-brand-primary text-brand-primary-dark'
-          : 'border-transparent text-gray-700 hover:text-gray-700'
+          ? 'border-brand-yellow text-white'
+          : 'border-transparent text-gray-400 hover:text-white'
       }`}
     >
       {children}
@@ -148,15 +148,20 @@ function Login({ onIngresar, sesionVencida }) {
   }
 
   return (
-    <div className="mx-auto max-w-sm p-8">
-      <h1 className="text-xl font-semibold text-brand-primary-dark">FT-CodeNation</h1>
-      <p className="text-sm text-gray-700">Gestión de Stock e Insumos Agrícolas</p>
-      {sesionVencida && (
-        <p className="mt-4 rounded-md bg-amber-50 p-2 text-sm text-amber-800">
-          Tu sesión venció. Ingresá de nuevo para continuar.
-        </p>
-      )}
-      <form onSubmit={ingresar} className="mt-4 space-y-3">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-brand-navy p-4">
+      <div className="mb-8">
+        <Marca tamaño="grande" />
+      </div>
+      <form onSubmit={ingresar} className="w-full max-w-sm space-y-5 rounded-xl bg-white p-6 shadow-xl">
+        <div>
+          <h1 className="text-lg font-semibold text-brand-ink">Ingresar</h1>
+          <p className="mt-1 text-sm text-gray-500">Ingresá con tu email y contraseña.</p>
+        </div>
+        {sesionVencida && (
+          <p className="rounded-md bg-amber-50 p-2 text-sm text-amber-800">
+            Tu sesión venció. Ingresá de nuevo para continuar.
+          </p>
+        )}
         <label className="block">
           <span className="text-sm text-gray-700">Email</span>
           <input
@@ -184,11 +189,12 @@ function Login({ onIngresar, sesionVencida }) {
         <button
           type="submit"
           disabled={cargando}
-          className="w-full rounded-md bg-brand-primary px-4 py-2 text-sm font-medium text-white hover:bg-brand-primary-dark disabled:opacity-50"
+          className="w-full rounded-full bg-brand-yellow px-5 py-2 text-sm font-semibold text-brand-ink hover:bg-brand-yellow-dark disabled:opacity-50"
         >
           {cargando ? 'Ingresando...' : 'Ingresar'}
         </button>
       </form>
+      <PieDeMarca className="mt-6" oscuro />
     </div>
   )
 }

@@ -125,7 +125,7 @@ function Insumos() {
       )}
 
       <form onSubmit={crearInsumo} className="space-y-3 rounded-md border border-gray-300 p-4">
-        <h2 className="text-sm font-medium text-brand-primary-dark">Nuevo insumo</h2>
+        <h2 className="text-sm font-medium text-brand-purple-dark">Nuevo insumo</h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           <label className="block">
             <span className="text-sm text-gray-700">Nombre</span>
@@ -210,7 +210,7 @@ function Insumos() {
 
         <button
           type="submit"
-          className="rounded-md bg-brand-primary px-4 py-2 text-sm font-medium text-white hover:bg-brand-primary-dark"
+          className="rounded-md bg-brand-yellow px-4 py-2 text-sm font-medium text-brand-ink hover:bg-brand-yellow-dark"
         >
           Crear insumo
         </button>
@@ -272,7 +272,7 @@ function Insumos() {
                 <button
                   type="button"
                   onClick={() => guardarEdicion(i.id)}
-                  className="rounded-md bg-brand-primary px-3 py-1 text-xs text-white"
+                  className="rounded-md bg-brand-yellow px-3 py-1 text-xs text-brand-ink"
                 >
                   Guardar
                 </button>
@@ -286,13 +286,13 @@ function Insumos() {
               <span className="text-gray-900">
                 {i.nombre}
                 {i.marca_nombre && <span className="text-gray-700"> · {i.marca_nombre}</span>}
-                {i.categoria_nombre && <span className="ml-2 text-xs text-brand-primary">{i.categoria_nombre}</span>}
+                {i.categoria_nombre && <span className="ml-2 text-xs text-brand-purple-dark">{i.categoria_nombre}</span>}
               </span>
               <div className="flex items-center gap-3">
                 <span className={Number(i.stock_actual) <= 0 ? 'font-medium text-red-600' : 'text-gray-700'}>
                   {i.stock_actual} {i.unidad_medida}
                 </span>
-                <button type="button" onClick={() => empezarEdicion(i)} className="text-xs text-brand-primary underline">
+                <button type="button" onClick={() => empezarEdicion(i)} className="text-xs text-brand-purple-dark underline">
                   Editar
                 </button>
                 <button type="button" onClick={() => desactivarInsumo(i)} className="text-xs text-red-600 underline">

@@ -102,7 +102,7 @@ function Lotes() {
       )}
 
       <form onSubmit={crearLote} className="space-y-3 rounded-md border border-gray-300 p-4">
-        <h2 className="text-sm font-medium text-brand-primary-dark">Nuevo lote</h2>
+        <h2 className="text-sm font-medium text-brand-purple-dark">Nuevo lote</h2>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <label className="block">
             <span className="text-sm text-gray-700">Campo</span>
@@ -157,7 +157,7 @@ function Lotes() {
 
         <button
           type="submit"
-          className="rounded-md bg-brand-primary px-4 py-2 text-sm font-medium text-white hover:bg-brand-primary-dark"
+          className="rounded-md bg-brand-yellow px-4 py-2 text-sm font-medium text-brand-ink hover:bg-brand-yellow-dark"
         >
           Crear lote
         </button>
@@ -205,7 +205,7 @@ function Lotes() {
                 <button
                   type="button"
                   onClick={() => guardarEdicion(l.id)}
-                  className="rounded-md bg-brand-primary px-3 py-1 text-xs text-white"
+                  className="rounded-md bg-brand-yellow px-3 py-1 text-xs text-brand-ink"
                 >
                   Guardar
                 </button>
@@ -219,13 +219,13 @@ function Lotes() {
               <div>
                 <span className="text-gray-900">{l.nombre}</span>
                 <span className="ml-2 text-gray-700">({l.campo_nombre})</span>
-                {l.poligono && <span className="ml-2 text-xs text-brand-primary">· dibujado en mapa</span>}
+                {l.poligono && <span className="ml-2 text-xs text-brand-purple-dark">· dibujado en mapa</span>}
               </div>
               <div className="flex items-center gap-3">
                 <span className="text-gray-700">
                   {l.hectareas} ha{l.perimetro_metros && ` · ${l.perimetro_metros} m perímetro`}
                 </span>
-                <button type="button" onClick={() => empezarEdicion(l)} className="text-xs text-brand-primary underline">
+                <button type="button" onClick={() => empezarEdicion(l)} className="text-xs text-brand-purple-dark underline">
                   Editar
                 </button>
                 <button type="button" onClick={() => desactivarLote(l)} className="text-xs text-red-600 underline">

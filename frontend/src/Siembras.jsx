@@ -167,7 +167,7 @@ function Siembras() {
       )}
 
       <form onSubmit={crearSiembra} className="space-y-3 rounded-md border border-gray-300 p-4">
-        <h2 className="text-sm font-medium text-brand-primary-dark">Nueva siembra</h2>
+        <h2 className="text-sm font-medium text-brand-purple-dark">Nueva siembra</h2>
         <p className="text-xs text-gray-700">
           Qué cultivo tiene cada lote en cada campaña. Después, al registrar un egreso de insumo a ese lote, se
           puede imputar a la siembra.
@@ -253,7 +253,7 @@ function Siembras() {
 
         <button
           type="submit"
-          className="rounded-md bg-brand-primary px-4 py-2 text-sm font-medium text-white hover:bg-brand-primary-dark"
+          className="rounded-md bg-brand-yellow px-4 py-2 text-sm font-medium text-brand-ink hover:bg-brand-yellow-dark"
         >
           Cargar siembra
         </button>
@@ -334,7 +334,7 @@ function Siembras() {
                 <button
                   type="button"
                   onClick={() => guardarEdicion(s.id)}
-                  className="rounded-md bg-brand-primary px-3 py-1 text-xs text-white"
+                  className="rounded-md bg-brand-yellow px-3 py-1 text-xs text-brand-ink"
                 >
                   Guardar
                 </button>
@@ -350,7 +350,7 @@ function Siembras() {
                   <span className="font-medium">{s.cultivo_nombre}</span> · {s.campania}
                   <span
                     className={`ml-2 rounded px-1.5 py-0.5 text-xs ${
-                      s.fecha_cosecha ? 'bg-gray-100 text-gray-700' : 'bg-green-50 text-brand-primary-dark'
+                      s.fecha_cosecha ? 'bg-gray-100 text-gray-700' : 'bg-green-50 text-brand-purple-dark'
                     }`}
                   >
                     {s.fecha_cosecha ? 'Cosechada' : 'En curso'}
@@ -363,7 +363,7 @@ function Siembras() {
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <button type="button" onClick={() => empezarEdicion(s)} className="text-xs text-brand-primary underline">
+                <button type="button" onClick={() => empezarEdicion(s)} className="text-xs text-brand-purple-dark underline">
                   Editar
                 </button>
                 <button type="button" onClick={() => eliminarSiembra(s)} className="text-xs text-red-600 underline">

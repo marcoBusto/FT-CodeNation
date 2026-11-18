@@ -36,6 +36,22 @@ La etapa "solo correcciones" de la beta se cerró el 2026-11-16 al arrancar la f
 | 9 | Alta de usuarios por pantalla, recuperar contraseña por email, 2FA opcional | Sin diseñar | Hoy los usuarios se crean a mano en la base |
 | 10 | Módulo de drones (recibir el archivo que genera el dron) | Sin definir formato | Mencionado en el README |
 
+## C. Cronograma (acordado con Marco el 2026-11-16)
+
+La lista de la sección B se ordenó el 2026-10-08 pero nunca tuvo fechas. Este cronograma asume una actualización por semana y un deploy al cierre de cada una. Las fechas se corren si una semana no se trabaja; el orden no.
+
+| Semana | Qué se hace | Necesita de Marco antes de empezar |
+|--------|-------------|------------------------------------|
+| 16–22 nov | Cerrar el deploy de Siembras (frontend a Vercel, incluye el fix de sesión vencida). Operativos: snapshots de Lightsail (A2), rotar credenciales (A5), quitar la línea duplicada del cron de backup, confirmar el 20 nov que el certificado de `stock` se renovó solo | `npx vercel login`; entrar a la consola de AWS |
+| 23–29 nov | N.º de lote SENASA en cada ENTRADA + link a AgroTraza (B2). Límite de intentos de login (A4) | Nada: B2 ya está diseñado |
+| 30 nov–13 dic | Costos por insumo y por campaña, y reportes por campaña (B3). Primera semana diseño y reglas, segunda construcción y tests | Definir reglas: de dónde sale el precio (por compra o precio vigente), moneda, qué reportes hacen falta |
+| 14–20 dic | Agente de IA v1, solo lectura (B4) | Decidir quién paga el uso de la API y dónde vive el chat |
+| 21 dic–3 ene | Sin funcionalidades nuevas: separar a Gino del tenant de demo (A3), cargar datos reales (A7), los 20 casos de QA manual (A10) | Datos reales del cliente |
+| Enero | Lector de QR desde la cámara (B5) y recordatorio de envases vacíos (B6) | Confirmar que siguen siendo prioridad |
+| Sin fecha | Agente v2 con escritura (B7, después de medir costos de la v1), offline (B8), alta de usuarios y recuperación de contraseña (B9), drones (B10), Wordfence (A6), plan comercial (A9) | — |
+
+Capacidad del servidor (A8): medido el 2026-11-16, disco al 21% y memoria al límite con la configuración ya en el mínimo. Decidir el upgrade a 2 GB antes de sumar el agente de IA o el primer cliente con uso diario.
+
 ## Descartado
 
 - App nativa (Kotlin/Flutter) para el lector de QR: un cambio de stack no justificado; se resuelve en la web app actual.

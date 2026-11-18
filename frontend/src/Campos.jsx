@@ -98,7 +98,7 @@ function Campos() {
       )}
 
       <form onSubmit={crearCampo} className="space-y-3 rounded-md border border-gray-300 p-4">
-        <h2 className="text-sm font-medium text-brand-primary-dark">Nuevo campo</h2>
+        <h2 className="text-sm font-medium text-brand-purple-dark">Nuevo campo</h2>
         <div className="grid grid-cols-2 gap-3">
           <label className="block">
             <span className="text-sm text-gray-700">Nombre</span>
@@ -125,7 +125,7 @@ function Campos() {
           <span className="text-sm text-gray-700">Ubicación en el mapa (opcional)</span>
           <MapaCampo key={mapaKey} onUbicacionCambiada={alFijarUbicacion} />
           {nuevoCampo.latitud && (
-            <p className="mt-1 text-xs text-brand-primary">
+            <p className="mt-1 text-xs text-brand-purple-dark">
               Coordenada marcada: {Number(nuevoCampo.latitud).toFixed(5)}, {Number(nuevoCampo.longitud).toFixed(5)}
             </p>
           )}
@@ -141,7 +141,7 @@ function Campos() {
 
         <button
           type="submit"
-          className="rounded-md bg-brand-primary px-4 py-2 text-sm font-medium text-white hover:bg-brand-primary-dark"
+          className="rounded-md bg-brand-yellow px-4 py-2 text-sm font-medium text-brand-ink hover:bg-brand-yellow-dark"
         >
           Crear campo
         </button>
@@ -173,7 +173,7 @@ function Campos() {
                   onUbicacionCambiada={alFijarUbicacionEdicion}
                 />
                 {campoEnEdicion.latitud && (
-                  <p className="mt-1 text-xs text-brand-primary">
+                  <p className="mt-1 text-xs text-brand-purple-dark">
                     Coordenada marcada: {Number(campoEnEdicion.latitud).toFixed(5)}, {Number(campoEnEdicion.longitud).toFixed(5)}
                   </p>
                 )}
@@ -189,7 +189,7 @@ function Campos() {
                 <button
                   type="button"
                   onClick={() => guardarEdicion(c.id)}
-                  className="rounded-md bg-brand-primary px-3 py-1 text-xs text-white"
+                  className="rounded-md bg-brand-yellow px-3 py-1 text-xs text-brand-ink"
                 >
                   Guardar
                 </button>
@@ -204,13 +204,13 @@ function Campos() {
                 <div className="text-gray-900">{c.nombre}</div>
                 {c.ubicacion && <div className="text-gray-700">{c.ubicacion}</div>}
                 {c.latitud != null && (
-                  <div className="text-xs text-brand-primary">
+                  <div className="text-xs text-brand-purple-dark">
                     · marcado en mapa ({Number(c.latitud).toFixed(4)}, {Number(c.longitud).toFixed(4)})
                   </div>
                 )}
               </div>
               <div className="flex gap-3 text-xs">
-                <button type="button" onClick={() => empezarEdicion(c)} className="text-brand-primary underline">
+                <button type="button" onClick={() => empezarEdicion(c)} className="text-brand-purple-dark underline">
                   Editar
                 </button>
                 <button type="button" onClick={() => desactivarCampo(c)} className="text-red-600 underline">

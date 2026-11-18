@@ -48,7 +48,7 @@ function CambiarContrasena() {
   return (
     <div className="mt-6">
       <form onSubmit={guardar} className="max-w-sm space-y-3 rounded-md border border-gray-300 p-4">
-        <h2 className="text-sm font-medium text-brand-primary-dark">Cambiar contraseña</h2>
+        <h2 className="text-sm font-medium text-brand-purple-dark">Cambiar contraseña</h2>
         <label className="block">
           <span className="text-sm text-gray-700">Contraseña actual</span>
           <input
@@ -101,7 +101,7 @@ function CambiarContrasena() {
         <button
           type="submit"
           disabled={cargando}
-          className="w-full rounded-md bg-brand-primary px-4 py-2 text-sm font-medium text-white hover:bg-brand-primary-dark disabled:opacity-50"
+          className="w-full rounded-md bg-brand-yellow px-4 py-2 text-sm font-medium text-brand-ink hover:bg-brand-yellow-dark disabled:opacity-50"
         >
           {cargando ? 'Guardando...' : 'Guardar'}
         </button>

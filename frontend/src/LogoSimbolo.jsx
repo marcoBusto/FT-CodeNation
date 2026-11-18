@@ -1,0 +1,26 @@
+// Símbolo de Code Nation (los corchetes pixelados), redibujado en SVG
+// sobre una grilla de 28 x 20 a partir del logo original. Los colores son
+// los del logo, no los tokens de la interfaz: el logo no cambia con el tema.
+// public/favicon.svg es el mismo dibujo; si se cambia uno, cambiar el otro.
+function LogoSimbolo({ className = 'h-8 w-auto' }) {
+  return (
+    <svg viewBox="0 0 28 20" className={className} role="img" aria-label="Code Nation">
+      <g fill="#ffe500">
+        <path d="M4 0H12V4H8V8H4Z" />
+        <path d="M20 12H24V20H16V16H20Z" />
+        <rect x="9" y="5" width="1" height="1" />
+        <rect x="18" y="14" width="1" height="1" />
+      </g>
+      <g fill="#9500f5" fillRule="evenodd">
+        <path d="M16 0H24V8H20V4H16Z M20 3H21V4H20Z" />
+        <path d="M4 12H8V16H12V20H4Z M7 16H8V17H7Z" />
+        <rect x="0" y="8" width="4" height="4" />
+        <rect x="24" y="8" width="4" height="4" />
+        <rect x="0" y="6" width="1" height="1" />
+        <rect x="27" y="13" width="1" height="1" />
+      </g>
+    </svg>
+  )
+}
+
+export default LogoSimbolo

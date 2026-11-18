@@ -46,7 +46,7 @@ function ReporteCamposLotes({ campos, lotesPorCampo }) {
   return (
     <div className="space-y-3 rounded-md border border-gray-300 p-4">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <h2 className="text-sm font-medium text-brand-primary-dark">{titulo}</h2>
+        <h2 className="text-sm font-medium text-brand-purple-dark">{titulo}</h2>
         <AccionesReporte
           rutaPdf="/reportes/campos-lotes"
           nombreArchivo="campos-lotes.pdf"
@@ -81,7 +81,7 @@ function ReporteCamposLotes({ campos, lotesPorCampo }) {
             </table>
           )}
           {lotesDelCampo.length > 0 && (
-            <p className="mt-1 text-xs font-medium text-brand-primary">Total: {totalHectareas.toFixed(2)} ha</p>
+            <p className="mt-1 text-xs font-medium text-brand-purple-dark">Total: {totalHectareas.toFixed(2)} ha</p>
           )}
         </div>
       ))}
@@ -95,7 +95,7 @@ function ReporteInsumosStock({ stock }) {
   return (
     <div className="space-y-3 rounded-md border border-gray-300 p-4">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <h2 className="text-sm font-medium text-brand-primary-dark">{titulo}</h2>
+        <h2 className="text-sm font-medium text-brand-purple-dark">{titulo}</h2>
         <AccionesReporte
           rutaPdf="/reportes/insumos-stock"
           nombreArchivo="insumos-stock.pdf"
@@ -194,13 +194,13 @@ function AccionesReporte({ rutaPdf, nombreArchivo, contenidoImprimible }) {
   return (
     <div className="flex flex-col items-end gap-1">
       <div className="flex gap-2 text-xs">
-        <button type="button" onClick={imprimir} className="text-brand-primary underline">
+        <button type="button" onClick={imprimir} className="text-brand-purple-dark underline">
           Imprimir
         </button>
-        <button type="button" onClick={descargarPdf} disabled={cargando} className="text-brand-primary underline disabled:opacity-40">
+        <button type="button" onClick={descargarPdf} disabled={cargando} className="text-brand-purple-dark underline disabled:opacity-40">
           Descargar PDF
         </button>
-        <button type="button" onClick={compartirPorWhatsapp} disabled={cargando} className="text-brand-primary underline disabled:opacity-40">
+        <button type="button" onClick={compartirPorWhatsapp} disabled={cargando} className="text-brand-purple-dark underline disabled:opacity-40">
           Compartir por WhatsApp
         </button>
       </div>

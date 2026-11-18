@@ -1,17 +1,37 @@
 @import "tailwindcss";
 
-/* Paleta de marca del cliente (Cabaña María Lucía de Ferrero): verde inglés
-   oscuro + dorado, tomada de su sitio institucional (ver docs/DECISIONES.md).
-   Logo pendiente de recibir en mejor calidad — por ahora el header usa texto. */
+/* Tipografías de la marca, guardadas dentro del sistema (no se cargan de
+   Google) para que se vean igual con mala señal en el campo. */
+@import "@fontsource/poppins/latin-400.css";
+@import "@fontsource/poppins/latin-500.css";
+@import "@fontsource/poppins/latin-600.css";
+@import "@fontsource/poppins/latin-700.css";
+@import "@fontsource/bebas-neue/latin-400.css";
+
+/* Identidad de CodeNation, la misma que SisCom (ver docs/DECISIONES.md,
+   2026-11-18). Reemplaza la paleta verde/dorado del cliente que se usó en
+   la beta. Es el ÚNICO lugar donde se definen colores y fuentes de la marca.
+   - navy: barra superior y login.
+   - yellow: botones principales, siempre con texto ink (contraste ~11:1).
+     Nunca como texto sobre blanco: no cumple el contraste mínimo.
+   - purple: acentos (links, títulos, destacados).
+   - font-display (Bebas Neue): solo el nombre del producto. */
 @theme {
-  --color-brand-primary: #1f4b33;
-  --color-brand-primary-dark: #163825;
-  --color-brand-accent: #c6a344;
+  --color-brand-purple: #8b00ff;
+  --color-brand-purple-dark: #6b00c7;
+  --color-brand-yellow: #f6ce1d;
+  --color-brand-yellow-dark: #e0b70a;
+  --color-brand-navy: #0f172a;
+  --color-brand-navy-light: #1e293b;
+  --color-brand-ink: #161a26;
+
+  --font-sans: "Poppins", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Bebas Neue", "Poppins", sans-serif;
 }
 
 @layer components {
   .campo {
     @apply w-full rounded-md border border-gray-300 px-3 py-2 text-sm
-      focus:border-brand-primary focus:outline-none focus:ring-1 focus:ring-brand-primary;
+      focus:border-brand-purple focus:outline-none focus:ring-1 focus:ring-brand-purple;
   }
 }

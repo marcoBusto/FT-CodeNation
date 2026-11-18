@@ -67,7 +67,7 @@ function SimuladorCompras() {
       )}
 
       <form onSubmit={calcular} className="space-y-3 rounded-md border border-gray-300 p-4">
-        <h2 className="text-sm font-medium text-brand-primary-dark">Simulador de compras</h2>
+        <h2 className="text-sm font-medium text-brand-purple-dark">Simulador de compras</h2>
         <p className="text-xs text-gray-600">
           Estimación rápida del costo de una compra en dólares — no queda guardada como historial.
         </p>
@@ -127,7 +127,7 @@ function SimuladorCompras() {
                 type="button"
                 onClick={buscarCotizacion}
                 disabled={buscandoCotizacion}
-                className="whitespace-nowrap rounded-md border border-brand-primary px-2 text-xs text-brand-primary disabled:opacity-40"
+                className="whitespace-nowrap rounded-md border border-brand-purple px-2 text-xs text-brand-purple-dark disabled:opacity-40"
               >
                 {buscandoCotizacion ? '...' : 'Actualizar'}
               </button>
@@ -150,14 +150,14 @@ function SimuladorCompras() {
 
         <button
           type="submit"
-          className="rounded-md bg-brand-primary px-4 py-2 text-sm font-medium text-white hover:bg-brand-primary-dark"
+          className="rounded-md bg-brand-yellow px-4 py-2 text-sm font-medium text-brand-ink hover:bg-brand-yellow-dark"
         >
           Calcular
         </button>
 
         {resultado && (
-          <div className="rounded-md bg-brand-primary/10 p-3 text-sm">
-            <p className="font-medium text-brand-primary-dark">
+          <div className="rounded-md bg-brand-purple/10 p-3 text-sm">
+            <p className="font-medium text-brand-purple-dark">
               Total: U$S {resultado.total_usd} · $ {resultado.total_ars} ARS
             </p>
             <p className="text-xs text-gray-700">
